@@ -4,3 +4,6 @@ const api = axios.create({
     baseURL:import.meta.env.VITE_API_URL,
     withCredentials:true // for setting token in cookies for every request
 })
+
+export default api;
+
