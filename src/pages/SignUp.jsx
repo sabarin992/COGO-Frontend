@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import api from "../api";
-import { data, Link } from "react-router-dom";
+import { data, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const SignUp = () => {
@@ -14,6 +14,7 @@ const SignUp = () => {
   // state to track loading status
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     // ensure all required input fields are filled
@@ -40,11 +41,19 @@ const SignUp = () => {
     try {
       const response = await api.post("/auth/register", payload);
       toast.success(response?.data?.message || "Registration successful");
+
+      navigate("/otp-verification", {
+        state: { email },
+      });
     } catch (error) {
-        console.log(error.response);
-        
+      console.log(error.response);
+
       toast.error(error?.response?.data?.detail || "Something went wrong");
-      toast.error(error?.response?.data?.detail?.[0]?.msg.split(',')[0]==='Value error'?error?.response?.data?.detail?.[0]?.msg.split(',')[1]:error?.response?.data?.detail?.[0]?.msg  || "Something went wrong");
+      toast.error(
+        error?.response?.data?.detail?.[0]?.msg.split(",")[0] === "Value error"
+          ? error?.response?.data?.detail?.[0]?.msg.split(",")[1]
+          : error?.response?.data?.detail?.[0]?.msg || "Something went wrong",
+      );
     } finally {
       setLoading(false);
     }

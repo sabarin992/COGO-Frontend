@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import Home from './pages/Home'
+import OtpVerification from './pages/OtpVerification';
 
 
 
@@ -18,6 +19,7 @@ function App() {
         <Route path='/home' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<SignUp/>}/>
+        <Route path='/otp-verification' element={<OtpVerification/>}/>
       </Routes>
     </>
   )
