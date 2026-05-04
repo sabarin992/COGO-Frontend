@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import api from "../api";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
+import GoogleAuth from "../components/GoogleAuthButton";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   // Login data state
@@ -33,7 +35,7 @@ const Login = () => {
 
       toast.success("Login successful!");
 
-      navigate("/home",{replace:true});
+      navigate("/home", { replace: true });
     } catch (error) {
       const details = error?.response?.data?.detail;
 
@@ -46,6 +48,45 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+ //  Google Login
+const handleGoogleSuccess = async (credentialResponse) => {
+  try {
+    const token = credentialResponse.credential;
+
+    const res = await api.post("/auth/google", {
+      token: token,
+    });
+
+    // Success toast
+    toast.success("Google login successful");
+    navigate("/home")
+
+    // Optional: show user name
+    if (res.data?.user?.name) {
+      toast.success(`Welcome ${res.data.user.name}`);
+    }
+
+
+  } catch (error) {
+    console.log(error);
+
+    // Extract backend error
+    let message = "Google login failed";
+
+    if (error.response) {
+      message = error.response.data?.detail || message;
+    } else if (error.request) {
+      message = "Server not responding";
+    } else {
+      message = error.message;
+    }
+
+    // Error toast
+    toast.error(message);
+  }
+
+}
   return (
     <>
       <div className="flex items-center justify-center h-screen">
@@ -88,6 +129,10 @@ const Login = () => {
 
             <Link to="/signup">Sign Up</Link>
           </div>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => console.log("Login Failed")}
+          />
         </form>
       </div>
     </>
