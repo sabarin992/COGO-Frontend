@@ -11,7 +11,7 @@ const Home = () => {
         try {
             const response = await api.post('/auth/logout')
             toast.success(response?.data?.message)
-            navigate('/login')
+            navigate('/login',{replace:true})
         } catch (error) {
             toast.error(error?.response?.data)
         }

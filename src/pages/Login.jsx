@@ -33,7 +33,7 @@ const Login = () => {
 
       toast.success("Login successful!");
 
-      navigate("/home");
+      navigate("/home",{replace:true});
     } catch (error) {
       const details = error?.response?.data?.detail;
 
