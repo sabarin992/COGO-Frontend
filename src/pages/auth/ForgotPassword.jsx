@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../api";
+import api from "../../api";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -24,7 +24,6 @@ const ForgotPassword = () => {
       navigate("/otp-verification", {
         state: { email, purpose: "forgot-password" },
       });
-
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Error sending OTP");
     } finally {

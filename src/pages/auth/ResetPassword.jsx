@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import api from "../api";
+import api from "../../api";
 import { toast } from "react-toastify";
 
 const ResetPassword = () => {
@@ -34,7 +34,6 @@ const ResetPassword = () => {
       toast.success("Password reset successful");
 
       navigate("/login", { replace: true });
-
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Reset failed");
     } finally {

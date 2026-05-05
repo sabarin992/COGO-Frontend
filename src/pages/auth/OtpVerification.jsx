@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "../api";
+import api from "../../api";
 import { toast } from "react-toastify";
 
 const OtpVerification = () => {
@@ -28,7 +28,6 @@ const OtpVerification = () => {
       if (purpose === "forgot-password") {
         navigate("/reset-password", { state: { email } });
       }
-
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Invalid OTP");
     } finally {
@@ -81,13 +80,13 @@ export default OtpVerification;
 
 //         const response = await api.post("/otp/verify-otp",{email,otp})
 //         toast.success(response?.data?.message)
-        
+
 //     } catch (error) {
 //         console.log(error.response);
-        
+
 //     }
 //   }
-  
+
 //   return (
 //     <>
 //       <div>
