@@ -2,14 +2,20 @@ import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
-import Home from "./pages/Home";
-import OtpVerification from "./pages/OtpVerification";
+
+
+
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+import SignUp from "./pages/auth/SignUp";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import OtpVerification from "./pages/auth/OtpVerification";
+import ResetPassword from "./pages/auth/ResetPassword";
+import Login from "./pages/auth/Login";
+import Home from "./pages/Home";
+
+
 
 
 
