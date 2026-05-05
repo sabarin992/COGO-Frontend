@@ -17,19 +17,12 @@ const Home = () => {
     }
   };
 
-  const handleProfile = async () => {
-    try {
-      const response = await api.get("/user/profile");
-      console.log(response.data);
-    } catch (error) {
-      console.log(error.response);
-    }
-  };
+  
   return (
     <>
       <div className="flex justify-between p-5">
         <h1 className="text-3xl">Home Page</h1>
-        <button className="border p-2 cursor-pointer" onClick={handleProfile}>
+        <button className="border p-2 cursor-pointer" onClick={()=>{navigate('/profile')}}>
           profile
         </button>
         <button className="border p-2 cursor-pointer" onClick={handleLogout}>
