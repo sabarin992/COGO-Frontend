@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [user, setUser] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getData = async () => {
@@ -16,6 +18,17 @@ const Profile = () => {
     getData();
   }, []);
 
+  const getUsers = async()=>{
+    try {
+        const response = await api.get("/user/admin/users");
+        console.log(response.data);
+        
+    } catch (error) {
+        console.log(error.response);
+        
+    }
+  }
+
   return (
     <>
       <div className="flex justify-between p-10">
@@ -26,8 +39,9 @@ const Profile = () => {
           <h3>Verify Your Govt ID</h3>
           <h3>Edit email</h3>
         </div>
-        <div>edit profile</div>
+        <div onClick={()=>{navigate("/edit-profile")}}>edit profile</div>
       </div>
+      <button onClick={getUsers}>Users</button>
     </>
   );
 };

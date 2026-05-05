@@ -12,6 +12,9 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import Login from "./pages/auth/Login";
 import Home from "./pages/Home";
 import Profile from "./pages/profile/Profile";
+import Edit_profile from "./pages/profile/Edit_profile";
+import AdminUser from "./pages/admin/AdminUser";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 function App() {
   return (
@@ -47,6 +50,23 @@ function App() {
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-profile"
+          element={
+            <ProtectedRoute>
+              <Edit_profile/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-users"
+          element={
+            <AdminProtectedRoute>
+              <AdminUser/>
+            </AdminProtectedRoute>
           }
         />
       </Routes>
