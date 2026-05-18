@@ -2,6 +2,8 @@ import React from "react";
 import api from "../api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/header";
+import Footer from "../components/Footer";
 
 const Home = () => {
   // useNavigate hook returns a function to navigate between routes
@@ -27,15 +29,11 @@ const Home = () => {
   };
   return (
     <>
-      <div className="flex justify-between p-5">
+      <Header />
+      <main className="min-h-screen flex justify-center items-center">
         <h1 className="text-3xl">Home Page</h1>
-        <button className="border p-2 cursor-pointer" onClick={handleProfile}>
-          profile
-        </button>
-        <button className="border p-2 cursor-pointer" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+      </main>
+      <Footer />
     </>
   );
 };
