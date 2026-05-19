@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const OtpVerificationForm = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
   const inputsRef = useRef([]);
@@ -121,8 +122,9 @@ const OtpVerificationForm = () => {
 
   // Resend OTP
   const handleResendOtp = async () => {
-    if (timeLeft > 0) return; // Prevent resend if timer is active
+    if (timeLeft > 0 || resendLoading) return; // Prevent resend if timer is active
 
+    setResendLoading(true);
     try {
       await api.post("/otp/resend-otp", { email });
 
@@ -134,6 +136,8 @@ const OtpVerificationForm = () => {
 
     } catch (error) {
       toast.error("Failed to resend OTP");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -198,14 +202,14 @@ const OtpVerificationForm = () => {
 
             <button
               onClick={handleResendOtp}
-              disabled={timeLeft > 0}
+              disabled={timeLeft > 0 || resendLoading}
               className={`w-full py-3 rounded-full font-medium transition ${
-                timeLeft > 0
+                timeLeft > 0 || resendLoading
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                   : "bg-gray-100 text-black hover:bg-gray-200 cursor-pointer"
               }`}
             >
-              {timeLeft > 0
+              {resendLoading ? "Resending..." : timeLeft > 0
                 ? `Resend OTP Code (00:${timeLeft.toString().padStart(2, '0')})`
                 : "Resend OTP Code"}
             </button>
