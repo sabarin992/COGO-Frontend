@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../api";
 import { toast } from "react-toastify";
@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const OtpVerificationForm = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
 
   const inputsRef = useRef([]);
 
@@ -14,6 +15,43 @@ const OtpVerificationForm = () => {
 
   const email = location.state?.email;
   const purpose = location.state?.purpose;
+  
+  const expiryKey = `cogo_otp_expiry_${email}`;
+
+  // Initialize timer
+  useEffect(() => {
+    if (!email) return;
+    
+    const expiry = localStorage.getItem(expiryKey);
+    const now = Date.now();
+    
+    if (expiry) {
+      const remaining = Math.max(0, Math.floor((parseInt(expiry, 10) - now) / 1000));
+      setTimeLeft(remaining);
+    } else {
+      // First time landing, set a 60s timer
+      const newExpiry = now + 60000;
+      localStorage.setItem(expiryKey, newExpiry.toString());
+      setTimeLeft(60);
+    }
+  }, [email, expiryKey]);
+
+  // Handle timer countdown
+  useEffect(() => {
+    let intervalId;
+    if (timeLeft > 0) {
+      intervalId = setInterval(() => {
+        const expiry = parseInt(localStorage.getItem(expiryKey) || "0", 10);
+        const remaining = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
+        setTimeLeft(remaining);
+        
+        if (remaining === 0) {
+          clearInterval(intervalId);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [timeLeft, expiryKey]);
 
   // Handle OTP Input
   const handleChange = (value, index) => {
@@ -59,6 +97,9 @@ const OtpVerificationForm = () => {
       });
 
       toast.success(response?.data?.message);
+      
+      // Clean up timer on success
+      localStorage.removeItem(expiryKey);
 
       if (purpose === "forgot-password") {
         navigate("/reset-password", {
@@ -80,8 +121,14 @@ const OtpVerificationForm = () => {
 
   // Resend OTP
   const handleResendOtp = async () => {
+    if (timeLeft > 0) return; // Prevent resend if timer is active
+
     try {
       await api.post("/otp/resend-otp", { email });
+
+      const newExpiry = Date.now() + 60000;
+      localStorage.setItem(expiryKey, newExpiry.toString());
+      setTimeLeft(60);
 
       toast.success("OTP resent successfully");
 
@@ -142,7 +189,7 @@ const OtpVerificationForm = () => {
             <button
               onClick={handleVerifyOtp}
               disabled={loading}
-              className="w-full bg-black text-white py-3 rounded-full font-semibold hover:opacity-90 transition disabled:opacity-50"
+              className="w-full bg-black text-white py-3 rounded-full font-semibold hover:opacity-90 transition disabled:opacity-50 cursor-pointer"
             >
               {loading
                 ? "Verifying..."
@@ -151,16 +198,23 @@ const OtpVerificationForm = () => {
 
             <button
               onClick={handleResendOtp}
-              className="w-full bg-gray-100 text-black py-3 rounded-full font-medium hover:bg-gray-200 transition"
+              disabled={timeLeft > 0}
+              className={`w-full py-3 rounded-full font-medium transition ${
+                timeLeft > 0
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 text-black hover:bg-gray-200 cursor-pointer"
+              }`}
             >
-              Resend OTP Code
+              {timeLeft > 0
+                ? `Resend OTP Code (00:${timeLeft.toString().padStart(2, '0')})`
+                : "Resend OTP Code"}
             </button>
           </div>
         </div>
 
         {/* Help */}
         <div className="mt-8 text-center">
-          <button className="text-sm text-gray-500 hover:text-black transition inline-flex items-center gap-2">
+          <button className="text-sm text-gray-500 hover:text-black transition inline-flex items-center gap-2 cursor-pointer">
             ❓ Need help with verification?
           </button>
         </div>
