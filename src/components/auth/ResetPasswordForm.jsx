@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const ResetPasswordForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -18,17 +19,88 @@ const ResetPasswordForm = () => {
 
   const email = location.state?.email;
 
+  const validatePassword = (value) => {
+    let error = "";
+    if (!value) error = "Password is required";
+    else if (value.length < 8) error = "Minimum 8 characters required";
+    else if (!/[A-Z]/.test(value)) error = "Must contain one uppercase letter";
+    else if (!/[a-z]/.test(value)) error = "Must contain one lowercase letter";
+    else if (!/\d/.test(value)) error = "Must contain one number";
+    else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) error = "Must contain one special character";
+    return error;
+  };
+
+  const validateConfirmPassword = (value, pwd) => {
+    let error = "";
+    if (!value) error = "Confirm Password is required";
+    else if (value !== pwd) error = "Passwords do not match";
+    return error;
+  };
+
+  const handlePasswordChange = (e) => {
+    const val = e.target.value;
+    setPassword(val);
+    setErrors((prev) => ({
+      ...prev,
+      password: validatePassword(val),
+      confirmPassword: confirmPassword ? validateConfirmPassword(confirmPassword, val) : prev.confirmPassword,
+    }));
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    const val = e.target.value;
+    setConfirmPassword(val);
+    setErrors((prev) => ({ ...prev, confirmPassword: validateConfirmPassword(val, password) }));
+  };
+
+  const getPasswordStrength = (value) => {
+    let score = 0;
+    if (value.length >= 8) score++;
+    if (/[a-z]/.test(value)) score++;
+    if (/[A-Z]/.test(value)) score++;
+    if (/\d/.test(value)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(value)) score++;
+    return score;
+  };
+
+  const renderPasswordStrength = () => {
+    if (!password) return null;
+    const strength = getPasswordStrength(password);
+    const colors = ["bg-red-500", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-400", "bg-green-600"];
+    const labels = ["", "Very Weak", "Weak", "Fair", "Good", "Strong"];
+
+    return (
+      <div className="mt-2">
+        <div className="flex gap-1 mb-1">
+          {[...Array(5)].map((_, index) => (
+            <div
+              key={index}
+              className={`h-1.5 w-full rounded-full transition-colors duration-300 ${
+                index < strength ? colors[strength] : "bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
+        <p className={`text-xs ${strength < 3 ? "text-red-500" : strength < 5 ? "text-yellow-600" : "text-green-600"}`}>
+          {labels[strength]}
+        </p>
+      </div>
+    );
+  };
+
   // Reset Password
   const handleResetPassword = async (e) => {
     e.preventDefault();
 
-    if (!password || !confirmPassword) {
-      toast.error("All fields are required");
-      return;
-    }
+    const passErr = validatePassword(password);
+    const confirmErr = validateConfirmPassword(confirmPassword, password);
 
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+    if (passErr || confirmErr) {
+      setErrors({
+        password: passErr,
+        confirmPassword: confirmErr,
+      });
+      toast.error("Please fix the errors in the form");
       return;
     }
 
@@ -101,8 +173,10 @@ const ResetPasswordForm = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter new password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl pl-12 pr-12 py-3 focus:outline-none focus:border-black transition"
+                onChange={handlePasswordChange}
+                className={`w-full border rounded-xl pl-12 pr-12 py-3 focus:outline-none transition ${
+                  errors.password ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+                }`}
               />
 
               {/* Show Hide */}
@@ -116,6 +190,8 @@ const ResetPasswordForm = () => {
                 {showPassword ? "🙈" : "👁"}
               </button>
             </div>
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+            {renderPasswordStrength()}
           </div>
 
           {/* Confirm Password */}
@@ -139,10 +215,10 @@ const ResetPasswordForm = () => {
                 }
                 placeholder="Confirm new password"
                 value={confirmPassword}
-                onChange={(e) =>
-                  setConfirmPassword(e.target.value)
-                }
-                className="w-full border border-gray-300 rounded-xl pl-12 pr-12 py-3 focus:outline-none focus:border-black transition"
+                onChange={handleConfirmPasswordChange}
+                className={`w-full border rounded-xl pl-12 pr-12 py-3 focus:outline-none transition ${
+                  errors.confirmPassword ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+                }`}
               />
 
               {/* Show Hide */}
@@ -158,6 +234,7 @@ const ResetPasswordForm = () => {
                 {showConfirmPassword ? "🙈" : "👁"}
               </button>
             </div>
+            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
           </div>
 
           {/* Button */}
