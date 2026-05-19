@@ -5,16 +5,33 @@ import { toast } from "react-toastify";
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  const validateEmail = (value) => {
+    let error = "";
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!value) error = "Email is required";
+    else if (!emailRegex.test(value)) error = "Invalid email format";
+    return error;
+  };
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value.replace(/\s/g, "").toLowerCase();
+    setEmail(val);
+    setErrors((prev) => ({ ...prev, email: validateEmail(val) }));
+  };
 
   // Send OTP
   const handleSendOtp = async (e) => {
     e.preventDefault();
 
-    if (!email) {
-      toast.error("Email is required");
+    const emailErr = validateEmail(email);
+    if (emailErr) {
+      setErrors({ email: emailErr });
+      toast.error("Please fix the errors in the form");
       return;
     }
 
@@ -82,9 +99,12 @@ const ForgotPasswordForm = () => {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-black transition"
+              onChange={handleEmailChange}
+              className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition ${
+                errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+              }`}
             />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
           {/* Button */}
