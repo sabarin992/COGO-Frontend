@@ -1,7 +1,23 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import api from "../api";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        console.log("logout button");
+        
+    try {
+      const response = await api.post("/auth/logout");
+      toast.success(response?.data?.message);
+      navigate("/login", { replace: true });
+    } catch (error) {
+      toast.error(error?.response?.data);
+    }
+  };
 
   return (
     <>
@@ -33,6 +49,13 @@ const Header = () => {
               className="text-gray-600 hover:text-black transition duration-200 font-semibold"
             >
               My Rides
+            </a>
+
+            <a
+              onClick={handleLogout}
+              className="text-gray-600 hover:text-black transition duration-200 font-semibold cursor-pointer"
+            >
+              Logout
             </a>
           </nav>
 
@@ -78,7 +101,7 @@ const Header = () => {
       </header>
 
       {/* Spacer */}
-      <div className="h-20"></div>
+      <div className="h-16"></div>
     </>
   );
 };

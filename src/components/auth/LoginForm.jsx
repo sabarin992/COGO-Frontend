@@ -13,7 +13,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Remember me
-  const [rememberMe, setRememberMe] = useState(false);
+  //   const [rememberMe, setRememberMe] = useState(false);
 
   // useNavigate hook
   const navigate = useNavigate();
@@ -40,8 +40,7 @@ const LoginForm = () => {
 
       toast.success("Login successful!");
 
-      navigate("/home", { replace: true });
-
+      window.location.replace("/");
     } catch (error) {
       const details = error?.response?.data?.detail;
 
@@ -50,7 +49,6 @@ const LoginForm = () => {
         : details || "Login failed";
 
       toast.error(message);
-
     } finally {
       setLoading(false);
     }
@@ -67,12 +65,11 @@ const LoginForm = () => {
 
       toast.success("Google login successful");
 
-      navigate("/home");
+      window.location.replace("/");
 
       if (res.data?.user?.name) {
         toast.success(`Welcome ${res.data.user.name}`);
       }
-
     } catch (error) {
       console.log(error);
 
@@ -92,18 +89,12 @@ const LoginForm = () => {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-10 bg-white">
-      
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-200 p-8 md:p-10">
-        
         {/* Heading */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">
-            Sign In
-          </h1>
+          <h1 className="text-3xl font-bold text-black mb-2">Sign In</h1>
 
-          <p className="text-gray-500 text-sm">
-            Welcome back to COGO.
-          </p>
+          <p className="text-gray-500 text-sm">Welcome back to COGO.</p>
         </div>
 
         {/* Form */}
@@ -114,7 +105,6 @@ const LoginForm = () => {
           }}
           className="space-y-6"
         >
-          
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -138,7 +128,6 @@ const LoginForm = () => {
 
           {/* Password */}
           <div>
-            
             {/* Label + Forgot */}
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm font-medium text-gray-700">
@@ -154,7 +143,6 @@ const LoginForm = () => {
             </div>
 
             <div className="relative">
-              
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                 🔒
               </span>
@@ -178,7 +166,7 @@ const LoginForm = () => {
           </div>
 
           {/* Remember Me */}
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <input
               type="checkbox"
               checked={rememberMe}
@@ -189,7 +177,7 @@ const LoginForm = () => {
             <label className="ml-2 text-sm text-gray-600">
               Remember me
             </label>
-          </div>
+          </div> */}
 
           {/* Login Button */}
           <button
@@ -203,9 +191,7 @@ const LoginForm = () => {
 
         {/* Divider */}
         <div className="mt-8">
-          
           <div className="relative">
-            
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
@@ -230,7 +216,6 @@ const LoginForm = () => {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
             Don't have an account?{" "}
-
             <Link
               to="/signup"
               className="text-black font-semibold hover:underline"
