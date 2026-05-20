@@ -33,7 +33,7 @@ const PublicRoute = ({ children }) => {
   }
 
   // If already logged in redirect to home
-  return <Navigate to="/home" replace />;
+  return <Navigate to="/" replace />;
 };
 
 export default PublicRoute;
