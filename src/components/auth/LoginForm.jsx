@@ -37,7 +37,7 @@ const LoginForm = () => {
 
     try {
       const res = await api.post("/auth/login", payload);
-
+        
       toast.success("Login successful!");
 
       window.location.replace("/");
