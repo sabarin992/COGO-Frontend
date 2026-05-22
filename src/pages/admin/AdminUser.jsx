@@ -17,24 +17,29 @@ import { toast } from "react-toastify";
 const AdminUser = () => {
   // Users and Loading State
   const [users, setUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch Users from Backend
-  const fetchUsers = async (search = "", status = "All") => {
+  const fetchUsers = async (search = "", status = "All", page = 1) => {
     setLoading(true);
     try {
       const response = await api.get("/user/admin-users", {
         params: {
           search,
-          status: status === "All" ? undefined : status
+          status: status === "All" ? undefined : status,
+          page,
+          size: ITEMS_PER_PAGE
         }
       });
+      const { users: fetchedUsers, total } = response.data;
       // Map API fields (is_blocked, full_name) to matches required by layout
       
       // Formatting backend data
-      const mappedUsers = response.data.map((user) => ({
+      const mappedUsers = fetchedUsers.map((user) => ({
         id: user.id,
         name: user.full_name,
         email: user.email,
@@ -46,6 +51,7 @@ const AdminUser = () => {
       }));
    
       setUsers(mappedUsers);
+      setTotalUsers(total);
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Failed to fetch users");
     } finally {
@@ -64,18 +70,17 @@ const AdminUser = () => {
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
-  // Fetch users when debounced search query or status filter changes
+  // Fetch users when debounced search query or status filter or currentPage changes
   useEffect(() => {
-    fetchUsers(debouncedSearchQuery, statusFilter);
-  }, [debouncedSearchQuery, statusFilter]);
+    fetchUsers(debouncedSearchQuery, statusFilter, currentPage);
+  }, [debouncedSearchQuery, statusFilter, currentPage]);
 
   // Pagination Logic
   const ITEMS_PER_PAGE = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-  const currentItems = users.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = users;
 
   // Reset page when search or status filters change
   useEffect(() => {
@@ -95,7 +100,7 @@ const AdminUser = () => {
         `User successfully ${isCurrentlyBlocked ? "unblocked" : "blocked"}`
       );
       // Refresh the user directory
-      fetchUsers(searchQuery, statusFilter);
+      fetchUsers(searchQuery, statusFilter, currentPage);
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Failed to update status");
     }
@@ -293,9 +298,9 @@ const AdminUser = () => {
             {/* Pagination */}
             <div className="px-6 py-5 border-t border-gray-200 flex items-center justify-between">
               <p className="text-sm text-gray-500">
-                Showing {users.length > 0 ? indexOfFirstItem + 1 : 0} to{" "}
-                {Math.min(indexOfLastItem, users.length)} of{" "}
-                {users.length} users
+                Showing {totalUsers > 0 ? indexOfFirstItem + 1 : 0} to{" "}
+                {Math.min(indexOfLastItem, totalUsers)} of{" "}
+                {totalUsers} users
               </p>
 
               {totalPages > 1 && (
