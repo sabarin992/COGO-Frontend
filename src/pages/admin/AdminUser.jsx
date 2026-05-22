@@ -22,23 +22,29 @@ const AdminUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch Users from Backend
-  const fetchUsers = async (search = "") => {
+  const fetchUsers = async (search = "", status = "All") => {
     setLoading(true);
     try {
       const response = await api.get("/user/admin-users", {
-        params: { search }
+        params: {
+          search,
+          status: status === "All" ? undefined : status
+        }
       });
       // Map API fields (is_blocked, full_name) to matches required by layout
+      
+      // Formatting backend data
       const mappedUsers = response.data.map((user) => ({
         id: user.id,
         name: user.full_name,
         email: user.email,
         phone: user.phone || "N/A",
         status: user.is_blocked ? "Blocked" : "Active",
-        rides: user.rides || Math.floor((user.id * 17) % 150) + 5, // deterministic mock rides
-        rating: user.rating || (4.0 + ((user.id * 7) % 10) / 10).toFixed(1), // deterministic mock rating
+        rides: user.rides || Math.floor((user.id * 17) % 150) + 5, // deterministic mock rides 
+        rating: user.rating || (4.0 + ((user.id * 7) % 10) / 10).toFixed(1), // deterministic mock rating 
         avatar: `https://i.pravatar.cc/40?img=${(user.id % 70) + 1}`,
       }));
+   
       setUsers(mappedUsers);
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Failed to fetch users");
@@ -47,28 +53,29 @@ const AdminUser = () => {
     }
   };
 
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+
   // Debounced search trigger
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchUsers(searchQuery);
+      setDebouncedSearchQuery(searchQuery);
     }, 400);
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
-  // Filter Logic
-  const filteredUsers = users.filter((user) => {
-    if (statusFilter === "All") return true;
-    return user.status === statusFilter;
-  });
+  // Fetch users when debounced search query or status filter changes
+  useEffect(() => {
+    fetchUsers(debouncedSearchQuery, statusFilter);
+  }, [debouncedSearchQuery, statusFilter]);
 
   // Pagination Logic
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = users.slice(indexOfFirstItem, indexOfLastItem);
 
   // Reset page when search or status filters change
   useEffect(() => {
@@ -88,7 +95,7 @@ const AdminUser = () => {
         `User successfully ${isCurrentlyBlocked ? "unblocked" : "blocked"}`
       );
       // Refresh the user directory
-      fetchUsers(searchQuery);
+      fetchUsers(searchQuery, statusFilter);
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Failed to update status");
     }
@@ -286,9 +293,9 @@ const AdminUser = () => {
             {/* Pagination */}
             <div className="px-6 py-5 border-t border-gray-200 flex items-center justify-between">
               <p className="text-sm text-gray-500">
-                Showing {filteredUsers.length > 0 ? indexOfFirstItem + 1 : 0} to{" "}
-                {Math.min(indexOfLastItem, filteredUsers.length)} of{" "}
-                {filteredUsers.length} users
+                Showing {users.length > 0 ? indexOfFirstItem + 1 : 0} to{" "}
+                {Math.min(indexOfLastItem, users.length)} of{" "}
+                {users.length} users
               </p>
 
               {totalPages > 1 && (
