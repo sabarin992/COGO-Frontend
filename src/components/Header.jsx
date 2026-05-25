@@ -2,25 +2,13 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated: isLoggedIn, setIsAuthenticated: setIsLoggedIn } = useAuth();
   const navigate = useNavigate();
-
-  // Verify authentication status on load
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        await api.get("/user/check-auth");
-        setIsLoggedIn(true);
-      } catch (error) {
-        setIsLoggedIn(false);
-      }
-    };
-    checkAuthStatus();
-  }, []);
 
   const handleLogout = async () => {
     try {
