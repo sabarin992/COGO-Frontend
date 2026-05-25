@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
 
 const AdminUser = () => {
   // Users and Loading State
@@ -22,6 +23,17 @@ const AdminUser = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Confirmation Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    userId: null,
+    currentStatus: "",
+    title: "",
+    message: "",
+    confirmText: "",
+    type: "info"
+  });
 
   // Fetch Users from Backend
   const fetchUsers = async (search = "", status = "All", page = 1) => {
@@ -87,8 +99,25 @@ const AdminUser = () => {
     setCurrentPage(1);
   }, [searchQuery, statusFilter]);
 
+  // Open Confirmation Modal
+  const openConfirmModal = (user) => {
+    const isCurrentlyBlocked = user.status === "Blocked";
+    setModalConfig({
+      userId: user.id,
+      currentStatus: user.status,
+      title: isCurrentlyBlocked ? "Unblock User" : "Block User",
+      message: isCurrentlyBlocked 
+        ? `Are you sure you want to unblock ${user.name}? This will restore their access immediately.`
+        : `Are you sure you want to block ${user.name}? This will revoke their access immediately.`,
+      confirmText: isCurrentlyBlocked ? "Yes, Unblock" : "Yes, Block",
+      type: isCurrentlyBlocked ? "info" : "danger"
+    });
+    setModalOpen(true);
+  };
+
   // Block/Unblock Action Handler
-  const handleToggleBlock = async (userId, currentStatus) => {
+  const handleConfirmToggleBlock = async () => {
+    const { userId, currentStatus } = modalConfig;
     const isCurrentlyBlocked = currentStatus === "Blocked";
     const endpoint = isCurrentlyBlocked 
       ? `/user/admin/unblock/${userId}` 
@@ -103,6 +132,8 @@ const AdminUser = () => {
       fetchUsers(searchQuery, statusFilter, currentPage);
     } catch (error) {
       toast.error(error?.response?.data?.detail || "Failed to update status");
+    } finally {
+      setModalOpen(false);
     }
   };
 
@@ -263,7 +294,7 @@ const AdminUser = () => {
                         <td className="px-6 py-5 text-right">
                           {user.status === "Blocked" ? (
                             <button
-                              onClick={() => handleToggleBlock(user.id, user.status)}
+                              onClick={() => openConfirmModal(user)}
                               className="px-4 py-2 bg-black text-white hover:bg-gray-800 transition-all rounded-xl text-sm font-medium flex items-center gap-2 ml-auto cursor-pointer"
                             >
                               <Unlock className="w-[18px] h-[18px]" />
@@ -271,7 +302,7 @@ const AdminUser = () => {
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleToggleBlock(user.id, user.status)}
+                              onClick={() => openConfirmModal(user)}
                               className="px-4 py-2 border border-red-200 text-red-500 hover:bg-red-500 hover:text-white transition-all rounded-xl text-sm font-medium flex items-center gap-2 ml-auto cursor-pointer"
                             >
                               <Ban className="w-[18px] h-[18px]" />
@@ -340,6 +371,16 @@ const AdminUser = () => {
           </div>
         </div>
       </main>
+
+      <ConfirmationModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleConfirmToggleBlock}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        type={modalConfig.type}
+      />
     </>
   );
 };
