@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAdminUsers, blockUser, unblockUser } from "../../services/userService";
-import AdminSideBar from "../../components/admin/AdminSideBar";
-import AdminHeader from "../../components/admin/AdminHeader";
+import { useOutletContext } from "react-router-dom";
 import {
   Plus,
   SlidersHorizontal,
@@ -21,7 +20,7 @@ const AdminUser = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery, setSearchQuery } = useOutletContext();
   const [currentPage, setCurrentPage] = useState(1);
 
   // Confirmation Modal State
@@ -137,11 +136,7 @@ const AdminUser = () => {
 
   return (
     <>
-      <AdminSideBar />
-      <AdminHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-
-      <main className="ml-72 pt-20 min-h-screen bg-gray-50">
-        <div className="p-6 max-w-[1600px] mx-auto">
+      <div className="p-6 max-w-[1600px] mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -368,7 +363,6 @@ const AdminUser = () => {
             </div>
           </div>
         </div>
-      </main>
 
       <ConfirmationModal
         isOpen={modalOpen}

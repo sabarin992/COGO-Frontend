@@ -1,6 +1,5 @@
 import React from "react";
-import AdminSideBar from "../../components/admin/AdminSideBar";
-import AdminHeader from "../../components/admin/AdminHeader";
+
 import { 
   Users, 
   Bike, 
@@ -101,11 +100,7 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <AdminSideBar />
-      <AdminHeader />
-      
-      <main className="ml-72 pt-20 min-h-screen bg-gray-50">
-        <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+      <div className="p-6 max-w-[1600px] mx-auto space-y-6">
           
           {/* Header */}
           <div>
@@ -318,7 +313,6 @@ const AdminDashboard = () => {
 
           </div>
         </div>
-      </main>
     </>
   );
 };

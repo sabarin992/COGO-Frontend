@@ -1,11 +1,8 @@
 import React from "react";
-import Footer from "../components/Footer";
-import Header from "../components/header";
 
 const Home = () => {
   return (
     <>
-    <Header/>
     <main className="flex-grow">
       
       {/* Hero Section */}
@@ -180,7 +177,6 @@ const Home = () => {
         </div>
       </section>
     </main>
-    <Footer/>
     </>
   );
 };

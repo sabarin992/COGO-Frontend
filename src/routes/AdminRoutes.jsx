@@ -1,36 +1,33 @@
-import { Route } from "react-router-dom";
-
+import React from "react";
 import AdminProtectedRoute from "../components/AdminProtectedRoute";
-
 import AdminUser from "../pages/admin/AdminUser";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLogin from "../pages/admin/AdminLogin";
-
+import AdminLayout from "../layouts/AdminLayout";
 
 const AdminRoutes = [
   {
     path: "/admin/login",
     element: <AdminLogin />,
   },
-
   {
-    path: "/admin/users",
+    path: "/admin",
     element: (
       <AdminProtectedRoute>
-        <AdminUser />
+        <AdminLayout />
       </AdminProtectedRoute>
     ),
-  },
-
-  {
-    path: "/admin/dashboard",
-    element: (
-      <AdminProtectedRoute>
-        <AdminDashboard />
-      </AdminProtectedRoute>
-    ),
+    children: [
+      {
+        path: "users",
+        element: <AdminUser />,
+      },
+      {
+        path: "dashboard",
+        element: <AdminDashboard />,
+      },
+    ],
   },
 ];
 
 export default AdminRoutes;
-
