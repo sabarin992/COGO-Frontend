@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../../api";
+import { register } from "../../services/authService";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -175,9 +175,9 @@ const SignUpForm = () => {
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/register", payload);
+      const data = await register(payload);
 
-      toast.success(response?.data?.message || "Registration successful");
+      toast.success(data?.message || "Registration successful");
 
       navigate("/otp-verification", {
         state: { email },

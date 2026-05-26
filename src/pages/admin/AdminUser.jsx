@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from "../../api";
+import { getAdminUsers, blockUser, unblockUser } from "../../services/userService";
 import AdminSideBar from "../../components/admin/AdminSideBar";
 import AdminHeader from "../../components/admin/AdminHeader";
 import {
@@ -39,15 +39,13 @@ const AdminUser = () => {
   const fetchUsers = async (search = "", status = "All", page = 1) => {
     setLoading(true);
     try {
-      const response = await api.get("/user/admin-users", {
-        params: {
-          search,
-          status: status === "All" ? undefined : status,
-          page,
-          size: ITEMS_PER_PAGE
-        }
+      const data = await getAdminUsers({
+        search,
+        status: status === "All" ? undefined : status,
+        page,
+        size: ITEMS_PER_PAGE
       });
-      const { users: fetchedUsers, total } = response.data;
+      const { users: fetchedUsers, total } = data;
       // Map API fields (is_blocked, full_name) to matches required by layout
       
       // Formatting backend data
@@ -119,12 +117,12 @@ const AdminUser = () => {
   const handleConfirmToggleBlock = async () => {
     const { userId, currentStatus } = modalConfig;
     const isCurrentlyBlocked = currentStatus === "Blocked";
-    const endpoint = isCurrentlyBlocked 
-      ? `/user/admin/unblock/${userId}` 
-      : `/user/admin/block/${userId}`;
-    
     try {
-      await api.patch(endpoint);
+      if (isCurrentlyBlocked) {
+        await unblockUser(userId);
+      } else {
+        await blockUser(userId);
+      }
       toast.success(
         `User successfully ${isCurrentlyBlocked ? "unblocked" : "blocked"}`
       );

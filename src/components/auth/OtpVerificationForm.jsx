@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "../../api";
+import { verifyOtp, resendOtp } from "../../services/authService";
 import { toast } from "react-toastify";
 
 const OtpVerificationForm = () => {
@@ -92,12 +92,9 @@ const OtpVerificationForm = () => {
     setLoading(true);
 
     try {
-      const response = await api.post("/otp/verify-otp", {
-        email,
-        otp: finalOtp,
-      });
+      const data = await verifyOtp(email, finalOtp);
 
-      toast.success(response?.data?.message);
+      toast.success(data?.message);
       
       // Clean up timer on success
       localStorage.removeItem(expiryKey);
@@ -126,7 +123,7 @@ const OtpVerificationForm = () => {
 
     setResendLoading(true);
     try {
-      await api.post("/otp/resend-otp", { email });
+      await resendOtp(email);
 
       const newExpiry = Date.now() + 60000;
       localStorage.setItem(expiryKey, newExpiry.toString());

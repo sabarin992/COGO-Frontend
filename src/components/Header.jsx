@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import api from "../api";
+import { logout } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -12,8 +12,8 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await api.post("/auth/logout");
-      toast.success(response?.data?.message || "Logged out successfully");
+      const data = await logout();
+      toast.success(data?.message || "Logged out successfully");
       setIsLoggedIn(false);
       navigate("/login", { replace: true });
     } catch (error) {

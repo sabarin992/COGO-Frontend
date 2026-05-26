@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../../api";
+import { adminLogin } from "../../services/authService";
 import { toast } from "react-toastify";
 
 const AdminLogin = () => {
@@ -16,12 +16,7 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
-      const payload = {
-        email: email.trim(),
-        password,
-      };
-      
-      const res = await api.post("/auth/admin/login", payload);
+      await adminLogin(email.trim(), password);
       toast.success("Admin login successful!");
       
       // Redirect to the Admin Dashboard

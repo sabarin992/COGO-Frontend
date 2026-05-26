@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import api from "../../api";
+import { resetPassword } from "../../services/authService";
 import { toast } from "react-toastify";
 
 const ResetPasswordForm = () => {
@@ -107,10 +107,7 @@ const ResetPasswordForm = () => {
     setLoading(true);
 
     try {
-      await api.post("/user/reset-password", {
-        email,
-        password,
-      });
+      await resetPassword(email, password);
 
       toast.success("Password reset successful");
 

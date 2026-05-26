@@ -10,7 +10,7 @@ import {
   BarChart3,
   LogOut
 } from "lucide-react";
-import api from "../../api";
+import { logout } from "../../services/authService";
 import { toast } from "react-toastify";
 
 const AdminSideBar = () => {
@@ -69,7 +69,7 @@ const AdminSideBar = () => {
   // Logout Handler
   const handleLogout = async () => {
     try {
-      await api.post("/auth/logout");
+      await logout();
       toast.success("Logged out successfully");
       // Redirect to the Admin Login
       window.location.replace("/admin/login");

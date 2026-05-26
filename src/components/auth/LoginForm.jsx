@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../../api";
+import { login, loginGoogle } from "../../services/authService";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
@@ -36,7 +36,7 @@ const LoginForm = () => {
     };
 
     try {
-      const res = await api.post("/auth/login", payload);
+      await login(email.trim(), password);
         
       toast.success("Login successful!");
 
@@ -59,16 +59,14 @@ const LoginForm = () => {
     try {
       const token = credentialResponse.credential;
 
-      const res = await api.post("/auth/google", {
-        token: token,
-      });
+      const data = await loginGoogle(token);
 
       toast.success("Google login successful");
 
       window.location.replace("/");
 
-      if (res.data?.user?.name) {
-        toast.success(`Welcome ${res.data.user.name}`);
+      if (data?.user?.name) {
+        toast.success(`Welcome ${data.user.name}`);
       }
     } catch (error) {
       console.log(error);

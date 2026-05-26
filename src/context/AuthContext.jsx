@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import api from "../api";
+import { checkAuth } from "../services/authService";
 
 const AuthContext = createContext();
 
@@ -7,10 +7,10 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const checkAuth = async () => {
+  const checkAuthUser = async () => {
     try {
-      const response = await api.get("/user/check-auth");
-      if (response.data && response.data.authenticated) {
+      const data = await checkAuth();
+      if (data && data.authenticated) {
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
@@ -23,11 +23,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    checkAuth();
+    checkAuthUser();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, loading, checkAuth }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, loading, checkAuth: checkAuthUser }}>
       {children}
     </AuthContext.Provider>
   );

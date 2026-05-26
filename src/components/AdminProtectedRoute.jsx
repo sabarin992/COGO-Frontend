@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import api from "../api";
+import { getUserProfile } from "../services/userService";
 
 const AdminProtectedRoute = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(null);
@@ -8,8 +8,8 @@ const AdminProtectedRoute = ({ children }) => {
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
-        const response = await api.get("/user/profile");
-        if (response.data && response.data.role === "admin") {
+        const data = await getUserProfile();
+        if (data && data.role === "admin") {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);

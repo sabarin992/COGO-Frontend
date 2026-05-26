@@ -44,9 +44,17 @@ api.interceptors.response.use(
         console.error("Auto-logout request failed:", logoutError);
       }
 
-      if (window.location.pathname !== "/login") {
+      const isAuthPage = 
+        window.location.pathname === "/login" || 
+        window.location.pathname === "/admin/login";
+
+      if (!isAuthPage) {
         toast.error("Your account has been blocked by the administrator.");
-        window.location.href = "/login";
+        if (window.location.pathname.startsWith("/admin")) {
+          window.location.href = "/admin/login";
+        } else {
+          window.location.href = "/login";
+        }
       }
 
       return new Promise(() => {});
@@ -104,9 +112,18 @@ api.interceptors.response.use(
           console.error("Cleanup logout failed:", logoutError);
         }
 
-        if (window.location.pathname !== "/login" && window.location.pathname !== "/signup") {
+        const isAuthPage = 
+          window.location.pathname === "/login" || 
+          window.location.pathname === "/signup" || 
+          window.location.pathname === "/admin/login";
+
+        if (!isAuthPage) {
           toast.error("Your session has expired. Please log in again.");
-          window.location.href = "/login";
+          if (window.location.pathname.startsWith("/admin")) {
+            window.location.href = "/admin/login";
+          } else {
+            window.location.href = "/login";
+          }
         }
 
         return new Promise(() => {});
