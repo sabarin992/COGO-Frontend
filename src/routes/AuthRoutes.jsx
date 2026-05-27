@@ -21,19 +21,35 @@ const AuthRoutes = [
       },
       {
         path: "/signup",
-        element: <SignUp />,
+        element: (
+          <PublicRoute>
+            <SignUp />
+          </PublicRoute>
+        ),
       },
       {
         path: "/forgot-password",
-        element: <ForgotPassword />,
+        element: (
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        ),
       },
       {
         path: "/otp-verification",
-        element: <OtpVerification />,
+        element: (
+          <PublicRoute>
+            <OtpVerification />
+          </PublicRoute>
+        ),
       },
       {
         path: "/reset-password",
-        element: <ResetPassword />,
+        element: (
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        ),
       },
     ],
   },

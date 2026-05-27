@@ -3,6 +3,7 @@ import { login, loginGoogle } from "../../services/authService";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { useAuth } from "../../context/AuthContext";
 
 const LoginForm = () => {
   // Login data state
@@ -12,8 +13,7 @@ const LoginForm = () => {
   // Password visibility
   const [showPassword, setShowPassword] = useState(false);
 
-  // Remember me
-  //   const [rememberMe, setRememberMe] = useState(false);
+  const { setIsAuthenticated } = useAuth();
 
   // useNavigate hook
   const navigate = useNavigate();
@@ -37,10 +37,11 @@ const LoginForm = () => {
 
     try {
       await login(email.trim(), password);
-        
-      toast.success("Login successful!");
 
-      window.location.replace("/");
+      toast.success("Login successful!");
+      setIsAuthenticated(true)
+
+      navigate('/');
     } catch (error) {
       const details = error?.response?.data?.detail;
 
@@ -62,8 +63,8 @@ const LoginForm = () => {
       const data = await loginGoogle(token);
 
       toast.success("Google login successful");
-
-      window.location.replace("/");
+      setIsAuthenticated(true)
+      navigate("/", { replace: true });
 
       if (data?.user?.name) {
         toast.success(`Welcome ${data.user.name}`);
@@ -205,7 +206,7 @@ const LoginForm = () => {
           <div className="mt-6 flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-              onError={() => console.log("Login Failed")}
+              onError={() => toast.error("Login Failed")}
             />
           </div>
         </div>
