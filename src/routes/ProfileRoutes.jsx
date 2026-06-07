@@ -1,25 +1,26 @@
 import { Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/ProtectedRoute";
-import UserLayout from "../layouts/UserLayout";
 import Home from "../pages/Home";
+import Profile from "../pages/profile/Profile";
+import ProfileLayout from "../layouts/ProfileLayout";
 
 
-const UserRoutes = [
+const ProfileRoutes = [
   {
-    path: "/",
+    path: "/profile",
     element: (
       <ProtectedRoute>
-        <UserLayout />
+        <ProfileLayout />
       </ProtectedRoute>
     ),
     children: [
       {
         path: "",
-        element: <Home />,
+        element: <Profile />,
       },
     ],
   },
 ];
 
-export default UserRoutes;
+export default ProfileRoutes;
