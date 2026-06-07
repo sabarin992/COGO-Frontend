@@ -1,25 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import api from "../api"; // your axios instance
+import { useAuth } from "../context/AuthContext";
 
 const PublicRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await api.get("/user/check-auth"); 
-        setIsAuthenticated(true);
-      } catch {
-        setIsAuthenticated(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
+  const { isAuthenticated, loading } = useAuth();
 
   // While checking authentication
-  if (isAuthenticated === null) {
+  if (loading || isAuthenticated === null) {
     return (
       <div className="h-screen flex items-center justify-center">
         Checking authentication...
@@ -33,7 +20,7 @@ const PublicRoute = ({ children }) => {
   }
 
   // If already logged in redirect to home
-  return <Navigate to="/home" replace />;
+  return <Navigate to="/" replace />;
 };
 
 export default PublicRoute;
