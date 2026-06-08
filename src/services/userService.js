@@ -36,20 +36,16 @@ export const getUserProfile = async () => {
   }
 };
 
-// export const checkAuth = async () => {
-//   try {
-//     const response = await api.get("/user/check-auth");
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+export const editUserProfile = async (full_name,phone) => {
+  try {
+    const response = await api.put("/user/edit-profile", {
+        full_name,
+        phone,
+      });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
-// export const resetPassword = async (email, password) => {
-//   try {
-//     const response = await api.post("/user/reset-password", { email, password });
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+
