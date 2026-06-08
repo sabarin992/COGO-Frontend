@@ -1,12 +1,12 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import Header from "../components/header";
 import Footer from "../components/Footer";
+import ProfileHeader from "../components/profile/ProfileHeader";
 
 const ProfileLayout = () => {
   return (
     <>
-      <Header />
+      <ProfileHeader />
       <Outlet />
       <Footer />
     </>
