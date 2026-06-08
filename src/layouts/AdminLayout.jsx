@@ -8,11 +8,16 @@ const AdminLayout = () => {
 
   return (
     <>
-      <AdminSideBar />
-      <AdminHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <main className="ml-72 pt-20 min-h-screen bg-gray-50">
-        <Outlet context={{ searchQuery, setSearchQuery }} />
-      </main>
+      <div className="min-h-screen flex flex-col">
+        <AdminSideBar />
+        <AdminHeader
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+        <main className="ml-72 pt-20 min-h-screen bg-gray-50">
+          <Outlet context={{ searchQuery, setSearchQuery }} />
+        </main>
+      </div>
     </>
   );
 };
