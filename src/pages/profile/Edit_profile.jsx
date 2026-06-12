@@ -129,11 +129,11 @@ const Edit_profile = () => {
       }
       
       if (emailChanged) {
-        // Request OTP for new email first
-        await api.post("/user/request-email-update", { new_email: user.email });
-        
-        // Save other profile changes
+        // Save other profile changes first
         await api.put("/user/edit-profile", payload);
+
+        // Request OTP for new email
+        await api.post("/user/request-email-update", { new_email: user.email });
         
         toast.info("OTP sent to your new email. Please verify to update your email.");
         navigate("/otp-verification", {
@@ -153,11 +153,11 @@ const Edit_profile = () => {
           const emailChanged = user.email !== originalEmail;
           
           if (emailChanged) {
-            await api.post("/user/request-email-update", { new_email: user.email });
             await api.put("/user/edit-profile", {
               full_name: user.full_name,
               phone: user.phone,
             });
+            await api.post("/user/request-email-update", { new_email: user.email });
             toast.info("OTP sent to your new email. Please verify to update your email.");
             navigate("/otp-verification", {
               state: { email: user.email, purpose: "email-update" },
