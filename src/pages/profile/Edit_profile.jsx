@@ -13,8 +13,61 @@ const Edit_profile = () => {
     avatar: "",
   });
   const [originalEmail, setOriginalEmail] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Validation Rules
+  const validateFullName = (value) => {
+    let error = "";
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!value) error = "Full Name is required";
+    else if (value.length < 3) error = "Minimum 3 characters required";
+    else if (value.length > 50) error = "Maximum 50 characters allowed";
+    else if (!nameRegex.test(value))
+      error = "Only alphabets and spaces allowed";
+    return error;
+  };
+
+  const validateEmail = (value) => {
+    let error = "";
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!value) error = "Email is required";
+    else if (!emailRegex.test(value)) error = "Invalid email format";
+    return error;
+  };
+
+  const validatePhone = (value) => {
+    let error = "";
+    const phoneRegex = /^\+\d{1,3}\d{10}$/;
+    if (!value) error = "Phone number is required";
+    else if (!phoneRegex.test(value))
+      error =
+        "Must include country code (+) and exactly 10 digits (e.g. +919876543210)";
+    return error;
+  };
+
+  // Handlers
+  const handleFullNameChange = (e) => {
+    const val = e.target.value;
+    setUser((prev) => ({ ...prev, full_name: val }));
+    setErrors((prev) => ({ ...prev, full_name: validateFullName(val) }));
+  };
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value.replace(/\s/g, "").toLowerCase();
+    setUser((prev) => ({ ...prev, email: val }));
+    setErrors((prev) => ({ ...prev, email: validateEmail(val) }));
+  };
+
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/[^\d+]/g, "");
+    if (val.indexOf("+") > 0) val = val.replace(/\+/g, "");
+    if (val.startsWith("+")) val = "+" + val.substring(1).replace(/\+/g, "");
+    val = val.slice(0, 14);
+    setUser((prev) => ({ ...prev, phone: val }));
+    setErrors((prev) => ({ ...prev, phone: validatePhone(val) }));
+  };
 
   useEffect(() => {
     const getProfile = async () => {
@@ -46,6 +99,22 @@ const Edit_profile = () => {
 
   const handleProfileEdit = async (e) => {
     e.preventDefault();
+
+    // Validation Check on Submit
+    const nameErr = validateFullName(user.full_name);
+    const phoneErr = validatePhone(user.phone);
+    const emailErr = validateEmail(user.email);
+
+    if (nameErr || phoneErr || emailErr) {
+      setErrors({
+        full_name: nameErr,
+        phone: phoneErr,
+        email: emailErr,
+      });
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+
     setLoading(true);
     try {
       const emailChanged = user.email !== originalEmail;
@@ -90,7 +159,7 @@ const Edit_profile = () => {
               phone: user.phone,
             });
             toast.info("OTP sent to your new email. Please verify to update your email.");
-            navigate("/verify-otp", {
+            navigate("/otp-verification", {
               state: { email: user.email, purpose: "email-update" },
             });
           } else {
@@ -157,11 +226,16 @@ const Edit_profile = () => {
           <input
             type="text"
             value={user.full_name || ""}
-            onChange={(e) => setUser({ ...user, full_name: e.target.value })}
-            className="w-full py-4 px-5 bg-[#F8F9FA] hover:bg-[#F1F3F5]/80 focus:bg-white border border-gray-200 focus:border-black rounded-2xl text-sm font-semibold text-black transition-all outline-none"
+            onChange={handleFullNameChange}
+            className={`w-full py-4 px-5 bg-[#F8F9FA] hover:bg-[#F1F3F5]/80 focus:bg-white border ${
+              errors.full_name ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-black"
+            } rounded-2xl text-sm font-semibold text-black transition-all outline-none`}
             placeholder="Alex Johnson"
             required
           />
+          {errors.full_name && (
+            <p className="text-red-500 text-xs mt-1 self-start">{errors.full_name}</p>
+          )}
         </div>
 
         {/* Phone Number field */}
@@ -172,11 +246,16 @@ const Edit_profile = () => {
           <input
             type="text"
             value={user.phone || ""}
-            onChange={(e) => setUser({ ...user, phone: e.target.value })}
-            className="w-full py-4 px-5 bg-[#F8F9FA] hover:bg-[#F1F3F5]/80 focus:bg-white border border-gray-200 focus:border-black rounded-2xl text-sm font-semibold text-black transition-all outline-none"
-            placeholder="+91 98765 43210"
+            onChange={handlePhoneChange}
+            className={`w-full py-4 px-5 bg-[#F8F9FA] hover:bg-[#F1F3F5]/80 focus:bg-white border ${
+              errors.phone ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-black"
+            } rounded-2xl text-sm font-semibold text-black transition-all outline-none`}
+            placeholder="+919876543210"
             required
           />
+          {errors.phone && (
+            <p className="text-red-500 text-xs mt-1 self-start">{errors.phone}</p>
+          )}
         </div>
 
         {/* Email Address field */}
@@ -187,11 +266,16 @@ const Edit_profile = () => {
           <input
             type="email"
             value={user.email || ""}
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
-            className="w-full py-4 px-5 bg-[#F8F9FA] hover:bg-[#F1F3F5]/80 focus:bg-white border border-gray-200 focus:border-black rounded-2xl text-sm font-semibold text-black transition-all outline-none"
+            onChange={handleEmailChange}
+            className={`w-full py-4 px-5 bg-[#F8F9FA] hover:bg-[#F1F3F5]/80 focus:bg-white border ${
+              errors.email ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-black"
+            } rounded-2xl text-sm font-semibold text-black transition-all outline-none`}
             placeholder="alex.j@cogodrive.com"
             required
           />
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1 self-start">{errors.email}</p>
+          )}
         </div>
 
         {/* Action buttons (Save Changes & Cancel) */}
