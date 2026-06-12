@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { verifyOtp, resendOtp } from "../../services/authService";
+import { verifyOtp, resendOtp, verifyEmailUpdate } from "../../services/authService";
 import { toast } from "react-toastify";
 
 const OtpVerificationForm = () => {
@@ -92,7 +92,12 @@ const OtpVerificationForm = () => {
     setLoading(true);
 
     try {
-      const data = await verifyOtp(email, finalOtp);
+      let data;
+      if (purpose === "email-update") {
+        data = await verifyEmailUpdate(email, finalOtp);
+      } else {
+        data = await verifyOtp(email, finalOtp);
+      }
 
       toast.success(data?.message);
       
@@ -103,6 +108,8 @@ const OtpVerificationForm = () => {
         navigate("/reset-password", {
           state: { email },
         });
+      } else if (purpose === "email-update") {
+        navigate("/profile");
       } else {
         navigate("/login");
       }

@@ -38,9 +38,9 @@ const AuthRoutes = [
       {
         path: "/otp-verification",
         element: (
-          <PublicRoute>
+  
             <OtpVerification />
-          </PublicRoute>
+  
         ),
       },
       {

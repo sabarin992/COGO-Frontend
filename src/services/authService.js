@@ -81,6 +81,16 @@ export const resetPassword = async (email, password) => {
   }
 };
 
+export const verifyEmailUpdate = async (new_email, otp) => {
+  try {
+    const response = await api.post("/user/verify-email-update", { new_email, otp });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export const checkAuth = async () => {
   try {
     const response = await api.get("/user/check-auth");

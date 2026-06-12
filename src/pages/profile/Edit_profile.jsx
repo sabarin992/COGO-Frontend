@@ -12,6 +12,7 @@ const Edit_profile = () => {
     email: "",
     avatar: "",
   });
+  const [originalEmail, setOriginalEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,6 +21,7 @@ const Edit_profile = () => {
       try {
         const response = await api.get("/user/profile");
         setUser(response?.data);
+        setOriginalEmail(response?.data?.email || "");
       } catch (error) {
         console.log(error.response);
       }
@@ -46,10 +48,10 @@ const Edit_profile = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const emailChanged = user.email !== originalEmail;
       const payload = {
         full_name: user.full_name,
         phone: user.phone,
-        email: user.email,
       };
       
       // Only attach base64 avatar if it was newly uploaded/modified
@@ -57,22 +59,48 @@ const Edit_profile = () => {
         payload.avatar = user.avatar;
       }
       
-      const response = await api.put("/user/edit-profile", payload);
-      toast.success(response?.data?.message || "Profile updated successfully");
-      navigate("/profile");
+      if (emailChanged) {
+        // Request OTP for new email first
+        await api.post("/user/request-email-update", { new_email: user.email });
+        
+        // Save other profile changes
+        await api.put("/user/edit-profile", payload);
+        
+        toast.info("OTP sent to your new email. Please verify to update your email.");
+        navigate("/otp-verification", {
+          state: { email: user.email, purpose: "email-update" },
+        });
+      } else {
+        const response = await api.put("/user/edit-profile", payload);
+        toast.success(response?.data?.message || "Profile updated successfully");
+        navigate("/profile");
+      }
     } catch (error) {
       console.error(error.response);
       // Fallback if avatar payload was too large for backend JSON payload
       if (error?.response?.status === 413) {
         try {
           toast.warn("Image file is too large. Saving profile details without new photo.");
-          const response = await api.put("/user/edit-profile", {
-            full_name: user.full_name,
-            phone: user.phone,
-            email: user.email,
-          });
-          toast.success(response?.data?.message || "Profile updated successfully");
-          navigate("/profile");
+          const emailChanged = user.email !== originalEmail;
+          
+          if (emailChanged) {
+            await api.post("/user/request-email-update", { new_email: user.email });
+            await api.put("/user/edit-profile", {
+              full_name: user.full_name,
+              phone: user.phone,
+            });
+            toast.info("OTP sent to your new email. Please verify to update your email.");
+            navigate("/verify-otp", {
+              state: { email: user.email, purpose: "email-update" },
+            });
+          } else {
+            const response = await api.put("/user/edit-profile", {
+              full_name: user.full_name,
+              phone: user.phone,
+            });
+            toast.success(response?.data?.message || "Profile updated successfully");
+            navigate("/profile");
+          }
         } catch (fallbackError) {
           toast.error("Failed to update profile details");
         }
