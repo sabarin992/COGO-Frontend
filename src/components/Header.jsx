@@ -97,7 +97,10 @@ const Header = () => {
               </button> */}
               <div className="hidden md:flex items-center gap-6">
                 {/* Profile Icon */}
-                <button className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+                <button 
+                onClick={()=>{navigate("/profile")}}
+                className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
+                >
                   <User size={18} />
                 </button>
 
