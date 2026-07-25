@@ -1,31 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import api from "../api";
+import { logout } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { User } from "lucide-react";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated: isLoggedIn, setIsAuthenticated: setIsLoggedIn } = useAuth();
   const navigate = useNavigate();
-
-  // Verify authentication status on load
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        await api.get("/user/check-auth");
-        setIsLoggedIn(true);
-      } catch (error) {
-        setIsLoggedIn(false);
-      }
-    };
-    checkAuthStatus();
-  }, []);
 
   const handleLogout = async () => {
     try {
-      const response = await api.post("/auth/logout");
-      toast.success(response?.data?.message || "Logged out successfully");
+      const data = await logout();
+      toast.success(data?.message || "Logged out successfully");
       setIsLoggedIn(false);
       navigate("/login", { replace: true });
     } catch (error) {
@@ -98,14 +87,33 @@ const Header = () => {
               </button>
 
               {/* Desktop Hamburger (Click to open Drawer Panel) */}
-              <button
+              {/* <button
                 onClick={() => setDesktopOpen(true)}
                 className="hidden md:flex flex-col gap-1.5 cursor-pointer hover:opacity-75 transition-opacity"
               >
                 <span className="w-6 h-0.5 bg-black"></span>
                 <span className="w-6 h-0.5 bg-black"></span>
                 <span className="w-6 h-0.5 bg-black"></span>
-              </button>
+              </button> */}
+              <div className="hidden md:flex items-center gap-6">
+                {/* Profile Icon */}
+                <button 
+                onClick={()=>{navigate("/profile")}}
+                className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
+                >
+                  <User size={18} />
+                </button>
+
+                {/* Hamburger Menu */}
+                <button
+                  onClick={() => setDesktopOpen(true)}
+                  className="flex flex-col gap-1.5 cursor-pointer hover:opacity-75 transition-opacity"
+                >
+                  <span className="w-6 h-0.5 bg-black"></span>
+                  <span className="w-6 h-0.5 bg-black"></span>
+                  <span className="w-6 h-0.5 bg-black"></span>
+                </button>
+              </div>
             </>
           ) : (
             /* Simple login button for non-authenticated guests */
@@ -165,7 +173,7 @@ const Header = () => {
               <span className="text-2xl font-black tracking-tight text-black">
                 COGO
               </span>
-              
+
               <button
                 onClick={() => setDesktopOpen(false)}
                 className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 transition-all cursor-pointer"
@@ -179,7 +187,11 @@ const Header = () => {
                   stroke="currentColor"
                   className="w-5 h-5"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>

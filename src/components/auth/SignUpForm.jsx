@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../../api";
+import { register } from "../../services/authService";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -30,7 +30,8 @@ const SignUpForm = () => {
     if (!value) error = "Full Name is required";
     else if (value.length < 3) error = "Minimum 3 characters required";
     else if (value.length > 50) error = "Maximum 50 characters allowed";
-    else if (!nameRegex.test(value)) error = "Only alphabets and spaces allowed";
+    else if (!nameRegex.test(value))
+      error = "Only alphabets and spaces allowed";
     return error;
   };
 
@@ -46,7 +47,9 @@ const SignUpForm = () => {
     let error = "";
     const phoneRegex = /^\+\d{1,3}\d{10}$/;
     if (!value) error = "Phone number is required";
-    else if (!phoneRegex.test(value)) error = "Must include country code (+) and exactly 10 digits (e.g. +919876543210)";
+    else if (!phoneRegex.test(value))
+      error =
+        "Must include country code (+) and exactly 10 digits (e.g. +919876543210)";
     return error;
   };
 
@@ -57,7 +60,8 @@ const SignUpForm = () => {
     else if (!/[A-Z]/.test(value)) error = "Must contain one uppercase letter";
     else if (!/[a-z]/.test(value)) error = "Must contain one lowercase letter";
     else if (!/\d/.test(value)) error = "Must contain one number";
-    else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) error = "Must contain one special character";
+    else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value))
+      error = "Must contain one special character";
     return error;
   };
 
@@ -96,14 +100,19 @@ const SignUpForm = () => {
     setErrors((prev) => ({
       ...prev,
       password: validatePassword(val),
-      confirmPassword: confirmPassword ? validateConfirmPassword(confirmPassword, val) : prev.confirmPassword,
+      confirmPassword: confirmPassword
+        ? validateConfirmPassword(confirmPassword, val)
+        : prev.confirmPassword,
     }));
   };
 
   const handleConfirmPasswordChange = (e) => {
     const val = e.target.value;
     setConfirmPassword(val);
-    setErrors((prev) => ({ ...prev, confirmPassword: validateConfirmPassword(val, password) }));
+    setErrors((prev) => ({
+      ...prev,
+      confirmPassword: validateConfirmPassword(val, password),
+    }));
   };
 
   const getPasswordStrength = (value) => {
@@ -119,7 +128,14 @@ const SignUpForm = () => {
   const renderPasswordStrength = () => {
     if (!password) return null;
     const strength = getPasswordStrength(password);
-    const colors = ["bg-red-500", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-400", "bg-green-600"];
+    const colors = [
+      "bg-red-500",
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-yellow-500",
+      "bg-green-400",
+      "bg-green-600",
+    ];
     const labels = ["", "Very Weak", "Weak", "Fair", "Good", "Strong"];
 
     return (
@@ -134,7 +150,9 @@ const SignUpForm = () => {
             />
           ))}
         </div>
-        <p className={`text-xs ${strength < 3 ? "text-red-500" : strength < 5 ? "text-yellow-600" : "text-green-600"}`}>
+        <p
+          className={`text-xs ${strength < 3 ? "text-red-500" : strength < 5 ? "text-yellow-600" : "text-green-600"}`}
+        >
           {labels[strength]}
         </p>
       </div>
@@ -175,9 +193,9 @@ const SignUpForm = () => {
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/register", payload);
+      const data = await register(payload);
 
-      toast.success(response?.data?.message || "Registration successful");
+      toast.success(data?.message || "Registration successful");
 
       navigate("/otp-verification", {
         state: { email },
@@ -190,7 +208,7 @@ const SignUpForm = () => {
       toast.error(
         error?.response?.data?.detail?.[0]?.msg.split(",")[0] === "Value error"
           ? error?.response?.data?.detail?.[0]?.msg.split(",")[1]
-          : error?.response?.data?.detail?.[0]?.msg || "Something went wrong"
+          : error?.response?.data?.detail?.[0]?.msg || "Something went wrong",
       );
     } finally {
       setLoading(false);
@@ -203,59 +221,81 @@ const SignUpForm = () => {
         {/* Heading */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-black mb-2">Create Account</h1>
-          <p className="text-sm text-gray-500">Join COGO and start riding today.</p>
+          <p className="text-sm text-gray-500">
+            Join COGO and start riding today.
+          </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleRegister} className="space-y-4">
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name
+            </label>
             <input
               type="text"
               placeholder="John Doe"
               value={full_name}
               onChange={handleFullNameChange}
               className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition ${
-                errors.full_name ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+                errors.full_name
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-black"
               }`}
             />
-            {errors.full_name && <p className="text-red-500 text-xs mt-1">{errors.full_name}</p>}
+            {errors.full_name && (
+              <p className="text-red-500 text-xs mt-1">{errors.full_name}</p>
+            )}
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
             <input
               type="email"
               placeholder="john@example.com"
               value={email}
               onChange={handleEmailChange}
               className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition ${
-                errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+                errors.email
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-black"
               }`}
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Phone
+            </label>
             <input
               type="text"
               placeholder="+919876543210"
               value={phone}
               onChange={handlePhoneChange}
               className={`w-full border rounded-xl px-4 py-3 focus:outline-none transition ${
-                errors.phone ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+                errors.phone
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-black"
               }`}
             />
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+            )}
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -263,7 +303,9 @@ const SignUpForm = () => {
                 value={password}
                 onChange={handlePasswordChange}
                 className={`w-full border rounded-xl px-4 py-3 pr-12 focus:outline-none transition ${
-                  errors.password ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+                  errors.password
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:border-black"
                 }`}
               />
               <button
@@ -274,13 +316,17 @@ const SignUpForm = () => {
                 {showPassword ? "🙈" : "👁"}
               </button>
             </div>
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
             {renderPasswordStrength()}
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password
+            </label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -288,7 +334,9 @@ const SignUpForm = () => {
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
                 className={`w-full border rounded-xl px-4 py-3 pr-12 focus:outline-none transition ${
-                  errors.confirmPassword ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-black"
+                  errors.confirmPassword
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:border-black"
                 }`}
               />
               <button
@@ -299,7 +347,11 @@ const SignUpForm = () => {
                 {showConfirmPassword ? "🙈" : "👁"}
               </button>
             </div>
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.confirmPassword}
+              </p>
+            )}
           </div>
 
           {/* Button */}
@@ -316,7 +368,10 @@ const SignUpForm = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
             Already have an account?{" "}
-            <Link to="/login" className="text-black font-semibold hover:underline">
+            <Link
+              to="/login"
+              className="text-black font-semibold hover:underline"
+            >
               Sign in
             </Link>
           </p>

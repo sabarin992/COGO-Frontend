@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../../api";
+import { sendOtp } from "../../services/authService";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -38,7 +38,7 @@ const ForgotPasswordForm = () => {
     setLoading(true);
 
     try {
-      await api.post("/otp/send-otp", { email });
+      await sendOtp(email);
 
       toast.success("OTP sent to your email");
 
