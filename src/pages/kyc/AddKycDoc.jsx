@@ -26,6 +26,36 @@ const AddKycDoc = () => {
   });
   const navigate = useNavigate();
 
+  const validateDocumentNumber = () => {
+    switch (docType) {
+      case "Aadhaar Card / ID":
+        if (!/^[2-9][0-9]{11}$/.test(docNum.replace(/\s/g, ""))) {
+          return "Enter a valid Aadhaar number.";
+        }
+
+        break;
+
+      case "Driver's License":
+        if (!/^[A-Z]{2}[0-9]{2}[0-9]{4}[0-9]{7}$/.test(docNum.toUpperCase())) {
+          return "Enter a valid driving licence number.";
+        }
+
+        break;
+
+      case "Passport":
+        if (!/^[A-Z][0-9]{7}$/.test(docNum.toUpperCase())) {
+          return "Enter a valid passport number.";
+        }
+
+        break;
+
+      default:
+        return "";
+    }
+
+    return "";
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -35,15 +65,20 @@ const AddKycDoc = () => {
 
     if (!docNum.trim()) {
       newErrors.document_number = "Document number is required.";
+    } else {
+      const error = validateDocumentNumber();
+
+      if (error) {
+        newErrors.document_number = error;
+      }
     }
 
     if (!frontDoc) {
       newErrors.front_document = "Front document is required.";
     }
 
-  
     if (!backDoc) {
-        newErrors.back_document = "Back document is required.";
+      newErrors.back_document = "Back document is required.";
     }
 
     setErrors(newErrors);
@@ -146,7 +181,14 @@ const AddKycDoc = () => {
             <input
               type="text"
               value={docType}
-              onChange={(e) => setDocType(e.target.value)}
+              onChange={(e) => {
+                setDocType(e.target.value);
+
+                setErrors((prev) => ({
+                  ...prev,
+                  document_type: "",
+                }));
+              }}
               placeholder="Or enter custom document type..."
               className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
             />
@@ -169,7 +211,14 @@ const AddKycDoc = () => {
               id="docNum"
               type="text"
               value={docNum}
-              onChange={(e) => setDocNum(e.target.value)}
+              onChange={(e) => {
+                setDocNum(e.target.value);
+
+                setErrors((prev) => ({
+                  ...prev,
+                  document_number: "",
+                }));
+              }}
               placeholder="e.g. DL-8842-XXXX or 4492-XXXX-1102"
               className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
             />
@@ -239,8 +288,18 @@ const AddKycDoc = () => {
                     <input
                       type="file"
                       accept="image/*,.pdf"
+                      //   onChange={(e) => {
+                      //     if (e.target.files[0]) setFrontDoc(e.target.files[0]);
+                      //   }}
                       onChange={(e) => {
-                        if (e.target.files[0]) setFrontDoc(e.target.files[0]);
+                        if (e.target.files[0]) {
+                          setFrontDoc(e.target.files[0]);
+
+                          setErrors((prev) => ({
+                            ...prev,
+                            front_document: "",
+                          }));
+                        }
                       }}
                       className="hidden"
                     />
@@ -251,8 +310,6 @@ const AddKycDoc = () => {
                     {errors.front_document}
                   </p>
                 )}
-
-                
               </div>
 
               {/* Back Side Upload */}
@@ -307,22 +364,29 @@ const AddKycDoc = () => {
                     <input
                       type="file"
                       accept="image/*,.pdf"
+                      //   onChange={(e) => {
+                      //     if (e.target.files[0]) setBackDoc(e.target.files[0]);
+                      //   }}
                       onChange={(e) => {
-                        if (e.target.files[0]) setBackDoc(e.target.files[0]);
+                        if (e.target.files[0]) {
+                          setBackDoc(e.target.files[0]);
+
+                          setErrors((prev) => ({
+                            ...prev,
+                            back_document: "",
+                          }));
+                        }
                       }}
                       className="hidden"
                     />
                   </label>
                 )}
-                { (
+                {
                   <p className="mt-2 text-sm text-red-500">
                     {errors.back_document}
                   </p>
-                )}
-                
+                }
               </div>
-              
-              
             </div>
           </div>
 
