@@ -5,7 +5,8 @@ import Home from "../pages/Home";
 import Profile from "../pages/profile/Profile";
 import ProfileLayout from "../layouts/ProfileLayout";
 import Edit_profile from "../pages/profile/Edit_profile";
-
+import KycDocuments from "../pages/kyc/KYCDocuments";
+import AddKycDoc from "../pages/kyc/AddKycDoc";
 
 const ProfileRoutes = [
   {
@@ -21,9 +22,17 @@ const ProfileRoutes = [
         element: <Profile />,
       },
       {
-        path:"edit-profile",
-        element:<Edit_profile/>
-      }
+        path: "edit-profile",
+        element: <Edit_profile />,
+      },
+      {
+        path: "kyc",
+        element: <KycDocuments />,
+      },
+      {
+        path: "add-kyc",
+        element: <AddKycDoc />,
+      },
     ],
   },
 ];

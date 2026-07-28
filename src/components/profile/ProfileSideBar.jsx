@@ -85,11 +85,13 @@ const ProfileSideBar = () => {
   ];
 
   const handleItemClick = (item) => {
-    if (item.path === "/profile") {
-      navigate(item.path);
-    } else {
-      toast.info(`${item.name} is coming soon!`);
-    }
+    // if (item.path === "/profile") {
+    //   navigate(item.path);
+    // } else {
+    //   toast.info(`${item.name} is coming soon!`);
+    // }
+
+    navigate(item.path);
   };
 
   return (

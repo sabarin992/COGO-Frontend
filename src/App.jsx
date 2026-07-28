@@ -8,12 +8,14 @@ import AdminRoutes from "./routes/AdminRoutes";
 import "react-toastify/dist/ReactToastify.css";
 import ProfileRoutes from "./routes/ProfileRoutes";
 
+
 function App() {
   const routes = useRoutes([
     ...UserRoutes,
     ...AuthRoutes,
     ...AdminRoutes,
-    ...ProfileRoutes
+    ...ProfileRoutes,
+
   ]);
 
   return (
