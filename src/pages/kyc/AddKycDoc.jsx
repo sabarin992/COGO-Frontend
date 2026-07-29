@@ -9,7 +9,9 @@ import {
   ShieldCheck,
   FileUp,
   Image as ImageIcon,
+  Crop,
 } from "lucide-react";
+import ModernImageCropper from "../../components/ModernImageCropper";
 import api from "../../api";
 import { toast } from "react-toastify";
 
@@ -18,6 +20,14 @@ const AddKycDoc = () => {
   const [docNum, setDocNum] = useState("");
   const [frontDoc, setFrontDoc] = useState(null);
   const [backDoc, setBackDoc] = useState(null);
+  const [rawFrontFile, setRawFrontFile] = useState(null);
+  const [rawBackFile, setRawBackFile] = useState(null);
+
+  // Crop Modal States
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [croppingTarget, setCroppingTarget] = useState(null); // "front" | "back"
+  const [tempImageSrc, setTempImageSrc] = useState(null);
+
   const [errors, setErrors] = useState({
     document_type: "",
     document_number: "",
@@ -26,33 +36,65 @@ const AddKycDoc = () => {
   });
   const navigate = useNavigate();
 
+  const handleFileSelect = (file, side) => {
+    if (!file) return;
+    if (file.type === "application/pdf") {
+      if (side === "front") {
+        setFrontDoc(file);
+        setRawFrontFile(file);
+        setErrors((prev) => ({ ...prev, front_document: "" }));
+      } else {
+        setBackDoc(file);
+        setRawBackFile(file);
+        setErrors((prev) => ({ ...prev, back_document: "" }));
+      }
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setTempImageSrc(objectUrl);
+    setCroppingTarget(side);
+    if (side === "front") setRawFrontFile(file);
+    else setRawBackFile(file);
+    setCropModalOpen(true);
+  };
+
+  const handleReCrop = (side) => {
+    const rawFile = side === "front" ? rawFrontFile : rawBackFile;
+    const docFile = side === "front" ? frontDoc : backDoc;
+    const targetFile = rawFile || docFile;
+
+    if (targetFile && typeof targetFile !== "string") {
+      const objectUrl = URL.createObjectURL(targetFile);
+      setTempImageSrc(objectUrl);
+      setCroppingTarget(side);
+      setCropModalOpen(true);
+    }
+  };
+
   const validateDocumentNumber = () => {
     switch (docType) {
       case "Aadhaar Card / ID":
         if (!/^[2-9][0-9]{11}$/.test(docNum.replace(/\s/g, ""))) {
           return "Enter a valid Aadhaar number.";
         }
-
         break;
 
       case "Driver's License":
         if (!/^[A-Z]{2}[0-9]{2}[0-9]{4}[0-9]{7}$/.test(docNum.toUpperCase())) {
           return "Enter a valid driving licence number.";
         }
-
         break;
 
       case "Passport":
         if (!/^[A-Z][0-9]{7}$/.test(docNum.toUpperCase())) {
           return "Enter a valid passport number.";
         }
-
         break;
 
       default:
         return "";
     }
-
     return "";
   };
 
@@ -67,7 +109,6 @@ const AddKycDoc = () => {
       newErrors.document_number = "Document number is required.";
     } else {
       const error = validateDocumentNumber();
-
       if (error) {
         newErrors.document_number = error;
       }
@@ -105,10 +146,9 @@ const AddKycDoc = () => {
 
     try {
       const { data } = await api.post("/kyc/upload-kyc", formData);
-
       toast.success(data.message);
-
       setErrors({});
+      navigate("/profile/kyc");
     } catch (error) {
       toast.error(error.response?.data?.detail ?? "Something went wrong.");
     }
@@ -124,7 +164,6 @@ const AddKycDoc = () => {
   return (
     <div className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
       <div className="mx-auto max-w-3xl">
-        {/* Top Header Navigation */}
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -144,12 +183,10 @@ const AddKycDoc = () => {
           </p>
         </header>
 
-        {/* Main Form Card */}
         <form
           onSubmit={handleSubmit}
           className="space-y-8 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm"
         >
-          {/* Document Type Selection */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-3">
               Document Type <span className="text-red-500">*</span>
@@ -183,11 +220,7 @@ const AddKycDoc = () => {
               value={docType}
               onChange={(e) => {
                 setDocType(e.target.value);
-
-                setErrors((prev) => ({
-                  ...prev,
-                  document_type: "",
-                }));
+                setErrors((prev) => ({ ...prev, document_type: "" }));
               }}
               placeholder="Or enter custom document type..."
               className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
@@ -199,7 +232,6 @@ const AddKycDoc = () => {
             )}
           </div>
 
-          {/* Document Number */}
           <div>
             <label
               htmlFor="docNum"
@@ -213,11 +245,7 @@ const AddKycDoc = () => {
               value={docNum}
               onChange={(e) => {
                 setDocNum(e.target.value);
-
-                setErrors((prev) => ({
-                  ...prev,
-                  document_number: "",
-                }));
+                setErrors((prev) => ({ ...prev, document_number: "" }));
               }}
               placeholder="e.g. DL-8842-XXXX or 4492-XXXX-1102"
               className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
@@ -229,14 +257,12 @@ const AddKycDoc = () => {
             )}
           </div>
 
-          {/* Document Upload Area: Front Side & Back Side */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-3">
               Upload Document Images <span className="text-red-500">*</span>
             </label>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Front Side Upload */}
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-gray-700 mb-2">
                   Front Side
@@ -253,21 +279,33 @@ const AddKycDoc = () => {
                       className="h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                      {typeof frontDoc !== "string" && frontDoc.type?.startsWith("image/") && (
+                        <button
+                          type="button"
+                          onClick={() => handleReCrop("front")}
+                          className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-900 shadow hover:bg-gray-100 transition"
+                        >
+                          <Crop className="h-3.5 w-3.5" />
+                          Crop
+                        </button>
+                      )}
                       <label className="cursor-pointer rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-900 shadow hover:bg-gray-100 transition">
                         Change
                         <input
                           type="file"
                           accept="image/*,.pdf"
                           onChange={(e) => {
-                            if (e.target.files[0])
-                              setFrontDoc(e.target.files[0]);
+                            if (e.target.files[0]) handleFileSelect(e.target.files[0], "front");
                           }}
                           className="hidden"
                         />
                       </label>
                       <button
                         type="button"
-                        onClick={() => setFrontDoc(null)}
+                        onClick={() => {
+                          setFrontDoc(null);
+                          setRawFrontFile(null);
+                        }}
                         className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-red-700 transition"
                       >
                         Remove
@@ -288,18 +326,8 @@ const AddKycDoc = () => {
                     <input
                       type="file"
                       accept="image/*,.pdf"
-                      //   onChange={(e) => {
-                      //     if (e.target.files[0]) setFrontDoc(e.target.files[0]);
-                      //   }}
                       onChange={(e) => {
-                        if (e.target.files[0]) {
-                          setFrontDoc(e.target.files[0]);
-
-                          setErrors((prev) => ({
-                            ...prev,
-                            front_document: "",
-                          }));
-                        }
+                        if (e.target.files[0]) handleFileSelect(e.target.files[0], "front");
                       }}
                       className="hidden"
                     />
@@ -312,7 +340,6 @@ const AddKycDoc = () => {
                 )}
               </div>
 
-              {/* Back Side Upload */}
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-gray-700 mb-2">
                   Back Side (Optional)
@@ -329,21 +356,33 @@ const AddKycDoc = () => {
                       className="h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                      {typeof backDoc !== "string" && backDoc.type?.startsWith("image/") && (
+                        <button
+                          type="button"
+                          onClick={() => handleReCrop("back")}
+                          className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-900 shadow hover:bg-gray-100 transition"
+                        >
+                          <Crop className="h-3.5 w-3.5" />
+                          Crop
+                        </button>
+                      )}
                       <label className="cursor-pointer rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-900 shadow hover:bg-gray-100 transition">
                         Change
                         <input
                           type="file"
                           accept="image/*,.pdf"
                           onChange={(e) => {
-                            if (e.target.files[0])
-                              setBackDoc(e.target.files[0]);
+                            if (e.target.files[0]) handleFileSelect(e.target.files[0], "back");
                           }}
                           className="hidden"
                         />
                       </label>
                       <button
                         type="button"
-                        onClick={() => setBackDoc(null)}
+                        onClick={() => {
+                          setBackDoc(null);
+                          setRawBackFile(null);
+                        }}
                         className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-red-700 transition"
                       >
                         Remove
@@ -364,33 +403,22 @@ const AddKycDoc = () => {
                     <input
                       type="file"
                       accept="image/*,.pdf"
-                      //   onChange={(e) => {
-                      //     if (e.target.files[0]) setBackDoc(e.target.files[0]);
-                      //   }}
                       onChange={(e) => {
-                        if (e.target.files[0]) {
-                          setBackDoc(e.target.files[0]);
-
-                          setErrors((prev) => ({
-                            ...prev,
-                            back_document: "",
-                          }));
-                        }
+                        if (e.target.files[0]) handleFileSelect(e.target.files[0], "back");
                       }}
                       className="hidden"
                     />
                   </label>
                 )}
-                {
+                {errors.back_document && (
                   <p className="mt-2 text-sm text-red-500">
                     {errors.back_document}
                   </p>
-                }
+                )}
               </div>
             </div>
           </div>
 
-          {/* Security & Verification Note */}
           <div className="flex items-start gap-3 rounded-xl bg-gray-50 p-4 border border-gray-200/80">
             <ShieldCheck className="h-5 w-5 text-gray-700 shrink-0 mt-0.5" />
             <p className="text-xs leading-relaxed text-gray-600">
@@ -400,7 +428,6 @@ const AddKycDoc = () => {
             </p>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
@@ -418,6 +445,25 @@ const AddKycDoc = () => {
           </div>
         </form>
       </div>
+
+      {cropModalOpen && (
+        <ModernImageCropper
+          imageSrc={tempImageSrc}
+          aspectRatio={16 / 10}
+          title={`Crop ${croppingTarget === "front" ? "Front Side" : "Back Side"} Document`}
+          onApply={(croppedResult) => {
+            if (croppingTarget === "front") {
+              setFrontDoc(croppedResult.file);
+              setErrors((prev) => ({ ...prev, front_document: "" }));
+            } else if (croppingTarget === "back") {
+              setBackDoc(croppedResult.file);
+              setErrors((prev) => ({ ...prev, back_document: "" }));
+            }
+            setCropModalOpen(false);
+          }}
+          onCancel={() => setCropModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
