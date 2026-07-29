@@ -1,9 +1,12 @@
 import { CheckCircle2, AlertCircle, Clock, Plus, Pencil, Eye, Upload, IdCard, Car, Globe, FileUp, Loader2, Info } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../api";
 // import licenseImg from "@/assets/kyc-license.jpg";
 // import passportImg from "@/assets/kyc-passport.jpg";
 
 function StatusBadge({ status }) {
+    
   const map = {
     verified: {
       icon: <CheckCircle2 className="h-3.5 w-3.5" />,
@@ -30,7 +33,45 @@ function StatusBadge({ status }) {
   );
 }
 
-function DocCard({ icon: Icon, title, id, status, image, submittedOn, action, verifying }) {
+function formatDate(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+
+  const dateFormatted = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+
+  const timeFormatted = date
+    .toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+    .toLowerCase();
+
+  return `${dateFormatted}  ${timeFormatted}`;
+}
+
+function DocCard({ icon: Icon, title, id, status, image, backImage, submittedOn, action, verifying }) {
+  const [activeSide, setActiveSide] = useState("front");
+  const [zoomOrigin, setZoomOrigin] = useState("center center");
+
+  const currentImage = activeSide === "back" && backImage ? backImage : image;
+
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomOrigin(`${x}% ${y}%`);
+  };
+
+  const handleMouseLeave = () => {
+    setZoomOrigin("center center");
+  };
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -58,8 +99,55 @@ function DocCard({ icon: Icon, title, id, status, image, submittedOn, action, ve
             </p>
           </div>
         ) : (
-          <div className="relative overflow-hidden rounded-xl bg-gray-100 aspect-[16/10]">
-            <img src={image} alt={title} className="h-full w-full object-cover" loading="lazy" />
+          <div
+            className="group relative overflow-hidden rounded-xl bg-gray-100 aspect-[16/10] cursor-zoom-in"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
+            {currentImage ? (
+              <img
+                src={currentImage}
+                alt={`${title} - ${activeSide}`}
+                className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.8]"
+                style={{ transformOrigin: zoomOrigin }}
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                No {activeSide} image available
+              </div>
+            )}
+
+            {backImage && (
+              <div
+                className="absolute top-3 right-3 flex rounded-lg bg-black/60 p-1 backdrop-blur-md z-10"
+                onMouseMove={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={() => setActiveSide("front")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+                    activeSide === "front"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-white/80 hover:text-white"
+                  }`}
+                >
+                  Front
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSide("back")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+                    activeSide === "back"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-white/80 hover:text-white"
+                  }`}
+                >
+                  Back
+                </button>
+              </div>
+            )}
+
             {verifying && (
               <div className="absolute inset-0 grid place-items-center">
                 <div className="flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-medium text-gray-700 shadow">
@@ -75,7 +163,7 @@ function DocCard({ icon: Icon, title, id, status, image, submittedOn, action, ve
       <div className="mt-4 flex items-end justify-between gap-3">
         <div>
           <p className="text-xs text-gray-500">Submitted on</p>
-          <p className="text-sm font-semibold text-gray-900">{submittedOn}</p>
+          <p className="text-sm font-semibold text-gray-900">{formatDate(submittedOn)}</p>
         </div>
         {action === "reupload" && (
           <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
@@ -112,6 +200,23 @@ function UploadCard() {
 export default function KycDocuments() {
 
     const navigate = useNavigate()
+    const [data,setData] = useState({})
+
+    useEffect(()=>{
+        const getData = async()=>{
+                try {
+                    const res = await api.get("/kyc/kyc-docs")
+                    setData(res.data);
+                    console.log(res.data.status);
+                    
+                    
+                } catch (error) {
+                    console.log(error.response);
+                    
+                }
+        }
+        getData()
+    },[])
   return (
     <div className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
       <div className="mx-auto max-w-6xl">
@@ -134,14 +239,15 @@ export default function KycDocuments() {
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <DocCard
             icon={Car}
-            title="Driver's License"
-            id="DL-8842-XXXX"
-            status="verified"
-            image={""}
-            submittedOn="Oct 12, 2023"
+            title={data.document_type}
+            id={data.document_number}
+            status={data.status || "pending"}
+            image={data.front_document_url}
+            backImage={data.back_document_url}
+            submittedOn={data.created_at}
             action="edit"
           />
-          <DocCard
+          {/* <DocCard
             icon={IdCard}
             title="Aadhaar Card / ID"
             id="4492-XXXX-1102"
@@ -154,12 +260,12 @@ export default function KycDocuments() {
             title="Passport"
             id="ZP-229103"
             status="pending"
-            image={""}
+            image={null}
             submittedOn="Feb 14, 2024"
             action="view"
             verifying
           />
-          <UploadCard />
+          <UploadCard /> */}
         </div>
       </div>
     </div>

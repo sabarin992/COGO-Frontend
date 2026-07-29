@@ -46,52 +46,60 @@ const ProfileSideBar = () => {
       name: "Account Overview",
       icon: User,
       path: "/profile",
+      enable:true
     },
     {
       name: "KYC Documents",
       icon: ShieldCheck,
       path: "/profile/kyc",
+      enable:true
     },
     {
       name: "Vehicles",
       icon: Car,
       path: "/profile/vehicles",
+      enable:false
     },
     {
       name: "Password Management",
       icon: Lock,
       path: "/profile/password",
+      enable:false
     },
     {
       name: "Wallet",
       icon: Wallet,
       path: "/profile/wallet",
+      enable:false
     },
     {
       name: "Payments",
       icon: CreditCard,
       path: "/profile/payments",
+      enable:false
     },
     {
       name: "SOS Management",
       icon: "SOS",
       path: "/profile/sos",
+      enable:false
     },
     {
       name: "Ride History",
       icon: History,
       path: "/profile/rides",
+      enable:false
     },
   ];
 
   const handleItemClick = (item) => {
-    // if (item.path === "/profile") {
-    //   navigate(item.path);
-    // } else {
-    //   toast.info(`${item.name} is coming soon!`);
-    // }
-
-    navigate(item.path);
+        if (item.enable){
+          navigate(item.path)
+        }
+        else{
+          toast.info(`${item.name} is coming soon`)
+        }
+   
   };
 
   return (
