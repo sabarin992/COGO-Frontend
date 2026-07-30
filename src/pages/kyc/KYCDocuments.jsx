@@ -239,12 +239,12 @@ export default function KycDocuments() {
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <DocCard
             icon={Car}
-            title={data.document_type}
-            id={data.document_number}
-            status={data.status || "pending"}
-            image={data.front_document_url}
-            backImage={data.back_document_url}
-            submittedOn={data.created_at}
+            title={data?.document_type}
+            id={data?.document_number}
+            status={data?.status || "pending"}
+            image={data?.front_document_url}
+            backImage={data?.back_document_url}
+            submittedOn={data?.created_at}
             action="edit"
           />
           {/* <DocCard
