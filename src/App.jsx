@@ -4,10 +4,10 @@ import { ToastContainer } from "react-toastify";
 import UserRoutes from "./routes/UserRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
+import ProfileRoutes from "./routes/ProfileRoutes";
+import NotFound from "./pages/NotFound";
 
 import "react-toastify/dist/ReactToastify.css";
-import ProfileRoutes from "./routes/ProfileRoutes";
-
 
 function App() {
   const routes = useRoutes([
@@ -15,7 +15,10 @@ function App() {
     ...AuthRoutes,
     ...AdminRoutes,
     ...ProfileRoutes,
-
+    {
+      path: "*",
+      element: <NotFound />,
+    },
   ]);
 
   return (
