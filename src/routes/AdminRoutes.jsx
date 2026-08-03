@@ -4,6 +4,7 @@ import AdminUser from "../pages/admin/AdminUser";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLogin from "../pages/admin/AdminLogin";
 import AdminLayout from "../layouts/AdminLayout";
+import AdminKYCVerification from "../pages/admin/AdminKYCVerification";
 
 const AdminRoutes = [
   {
@@ -25,6 +26,10 @@ const AdminRoutes = [
       {
         path: "dashboard",
         element: <AdminDashboard />,
+      },
+      {
+        path: "kyc",
+        element: <AdminKYCVerification />,
       },
     ],
   },
