@@ -38,6 +38,9 @@ const ProfileSideBar = () => {
         location.pathname === "/profile/edit-profile"
       );
     }
+    if (path === "/profile/vehicles") {
+      return location.pathname.startsWith("/profile/vehicles");
+    }
     return location.pathname === path;
   };
 
@@ -58,7 +61,7 @@ const ProfileSideBar = () => {
       name: "Vehicles",
       icon: Car,
       path: "/profile/vehicles",
-      enable:false
+      enable:true
     },
     {
       name: "Password Management",

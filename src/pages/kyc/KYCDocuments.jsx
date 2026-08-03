@@ -1,12 +1,10 @@
-import { CheckCircle2, AlertCircle, Clock, Plus, Pencil, Eye, Upload, IdCard, Car, Globe, FileUp, Loader2, Info } from "lucide-react";
+import { CheckCircle2, AlertCircle, Clock, Plus, Pencil, Eye, Car, Info, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
-// import licenseImg from "@/assets/kyc-license.jpg";
-// import passportImg from "@/assets/kyc-passport.jpg";
+import EmptyKycState from "../../components/kyc/EmptyKycState";
 
 function StatusBadge({ status }) {
-    
   const map = {
     verified: {
       icon: <CheckCircle2 className="h-3.5 w-3.5" />,
@@ -24,7 +22,7 @@ function StatusBadge({ status }) {
       cls: "bg-gray-100 text-gray-700",
     },
   };
-  const s = map[status];
+  const s = map[status] || map["pending"];
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${s.cls}`}>
       {s.icon}
@@ -185,88 +183,79 @@ function DocCard({ icon: Icon, title, id, status, image, backImage, submittedOn,
   );
 }
 
-function UploadCard() {
-  return (
-    <button className="flex min-h-[360px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white p-8 text-center transition hover:border-gray-400 hover:bg-gray-50">
-      <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-gray-100">
-        <FileUp className="h-5 w-5 text-gray-700" />
-      </div>
-      <p className="font-semibold text-gray-900">Submit more proof</p>
-      <p className="mt-1 text-sm text-gray-500">Secondary ID, Utility Bills, etc.</p>
-    </button>
-  );
-}
-
 export default function KycDocuments() {
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const navigate = useNavigate()
-    const [data,setData] = useState({})
-
-    useEffect(()=>{
-        const getData = async()=>{
-                try {
-                    const res = await api.get("/kyc/kyc-docs")
-                    setData(res.data);
-                    console.log(res.data.status);
-                    
-                    
-                } catch (error) {
-                    console.log(error.response);
-                    
-                }
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/kyc/kyc-docs");
+        if (res.data && res.data.document_type) {
+          setData(res.data);
+        } else {
+          setData(null);
         }
-        getData()
-    },[])
+      } catch (error) {
+        console.error("Error fetching KYC docs:", error?.response || error);
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getData();
+  }, []);
+
+  const hasDocuments = data && data.document_type;
+
   return (
     <div className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
       <div className="mx-auto max-w-6xl">
-        <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        {/* Header */}
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between mb-8">
           <div className="max-w-xl">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">KYC Documents</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              KYC Documents
+            </h1>
             <p className="mt-2 text-sm text-gray-600 sm:text-base">
               Manage your identity verification documents to ensure a secure and seamless experience on the COGO platform.
             </p>
           </div>
-          <button 
-          className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow hover:bg-gray-800"
-          onClick={()=>{navigate("/profile/add-kyc")}}
-          >
-            <Plus className="h-4 w-4" />
-            Add New Document
-          </button>
+          {hasDocuments && (
+            <button
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-2xl bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow hover:bg-gray-800 transition-all cursor-pointer active:scale-95"
+              onClick={() => navigate("/profile/add-kyc")}
+            >
+              <Plus className="h-4 w-4" />
+              Add New Document
+            </button>
+          )}
         </header>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <DocCard
-            icon={Car}
-            title={data?.document_type}
-            id={data?.document_number}
-            status={data?.status || "pending"}
-            image={data?.front_document_url}
-            backImage={data?.back_document_url}
-            submittedOn={data?.created_at}
-            action="edit"
-          />
-          {/* <DocCard
-            icon={IdCard}
-            title="Aadhaar Card / ID"
-            id="4492-XXXX-1102"
-            status="rejected"
-            submittedOn="Jan 05, 2024"
-            action="reupload"
-          />
-          <DocCard
-            icon={Globe}
-            title="Passport"
-            id="ZP-229103"
-            status="pending"
-            image={null}
-            submittedOn="Feb 14, 2024"
-            action="view"
-            verifying
-          />
-          <UploadCard /> */}
-        </div>
+        {/* Content Section */}
+        {loading ? (
+          <div className="w-full bg-white rounded-2xl border border-gray-200 p-12 flex flex-col items-center justify-center gap-3 animate-pulse">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-800" />
+            <p className="text-sm font-medium text-gray-500">Loading KYC documents...</p>
+          </div>
+        ) : !hasDocuments ? (
+          <EmptyKycState />
+        ) : (
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <DocCard
+              icon={Car}
+              title={data.document_type}
+              id={data.document_number}
+              status={data.status || "pending"}
+              image={data.front_document_url}
+              backImage={data.back_document_url}
+              submittedOn={data.created_at}
+              action="edit"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import ProfileRoutes from "./routes/ProfileRoutes";
 import NotFound from "./pages/NotFound";
 
 import "react-toastify/dist/ReactToastify.css";
+import VehicleRoutes from "./routes/VehicleRoutes";
 
 function App() {
   const routes = useRoutes([
@@ -15,6 +16,7 @@ function App() {
     ...AuthRoutes,
     ...AdminRoutes,
     ...ProfileRoutes,
+    ...VehicleRoutes,
     {
       path: "*",
       element: <NotFound />,
