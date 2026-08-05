@@ -9,10 +9,17 @@ import ReviewRideStep from "./ReviewRideStep";
 import ProgressIndicator from "./ProgressIndicator";
 import StepNavigation from "./StepNavigation";
 import { useRide } from "../../context/RideContext";
+import { createRide } from "../../services/rideService";
+import { useNavigate } from "react-router-dom";
 
 const RideWizard = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const { rideData } = useRide();
+
+  const navigate = useNavigate();
+
+  const { rideData, resetRideData } = useRide();
+
+  const [publishing, setPublishing] = useState(false);
 
   const steps = [
     <RideDetailsStep />,
@@ -26,6 +33,21 @@ const RideWizard = () => {
   if (currentStep === 3) {
     if (!rideData.travel_date) {
       alert("Please select travel date.");
+
+      return false;
+    }
+  }
+
+  if (currentStep === 4) {
+    if (!rideData.travel_time) {
+      alert("Please select departure time.");
+      return false;
+    }
+  }
+
+  if (currentStep === 5) {
+    if (!rideData.vehicle_id) {
+      alert("Please select a vehicle.");
 
       return false;
     }
@@ -65,16 +87,58 @@ const RideWizard = () => {
     return true;
   };
 
-  const nextStep = () => {
-    if (!validateCurrentStep()) {
-      return;
-    }
+  //   publish ride function
+  const publishRide = async () => {
+    try {
+      setPublishing(true);
 
-    if (currentStep < steps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
+      const payload = {
+        source: rideData.source,
+        destination: rideData.destination,
+        route: rideData.route,
+
+        travel_date: rideData.travel_date.toISOString().split("T")[0],
+
+        travel_time: rideData.travel_time.toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }),
+
+        available_seats: Number(rideData.available_seats),
+
+        vehicle_id: rideData.vehicle_id,
+      };
+
+      await createRide(payload);
+
+      resetRideData();
+
+      navigate("/post-ride/success");
+    } catch (error) {
+      console.error(error);
+
+      navigate("/post-ride/failure");
+    } finally {
+      setPublishing(false);
     }
   };
 
+  //   next button
+  const nextStep = async () => {
+    if (!validateCurrentStep()) return;
+
+    if (currentStep === steps.length - 1) {
+      await publishRide();
+
+      return;
+    }
+
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  //   previous button
   const previousStep = () => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
@@ -92,6 +156,7 @@ const RideWizard = () => {
         totalSteps={steps.length}
         nextStep={nextStep}
         previousStep={previousStep}
+        loading={publishing}
       />
     </div>
   );

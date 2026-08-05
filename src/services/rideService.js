@@ -1,6 +1,8 @@
 // Dummy route service
 // Later this function will call Google Directions API
 
+import api from "../api";
+
 export const getRoutes = async (source, destination) => {
   return [
     {
@@ -22,4 +24,13 @@ export const getRoutes = async (source, destination) => {
       duration: "1 hr 40 min",
     },
   ];
+};
+
+
+
+
+export const createRide = async (rideData) => {
+  const response = await api.post("/ride", rideData);
+
+  return response.data;
 };

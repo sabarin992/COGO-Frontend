@@ -11,15 +11,15 @@ export const RideProvider = ({ children }) => {
     route: "",
 
     travel_date: null,
-    travel_time: "",
+    travel_time: null,
 
     vehicle_id: null,
+    vehicle: null,
   });
 
-  useEffect(()=>{
-        console.log(rideData);
-        
-  },[rideData])
+  useEffect(() => {
+    console.log(rideData);
+  }, [rideData]);
 
   const updateRideData = (data) => {
     setRideData((prev) => ({
@@ -35,8 +35,9 @@ export const RideProvider = ({ children }) => {
       available_seats: 1,
       route: "",
       travel_date: null,
-      travel_time: "",
+      travel_time: null,
       vehicle_id: null,
+      vehicle: null
     });
   };
 

@@ -24,7 +24,7 @@ const VehicleList = () => {
       setLoading(true);
       const response = await getVehicles();
       // Handle both array responses or object wrapped data
-      const data = response?.data;
+      const data = response;
       if (Array.isArray(data)) {
         setVehicles(data);
       } else if (Array.isArray(data?.vehicles)) {
