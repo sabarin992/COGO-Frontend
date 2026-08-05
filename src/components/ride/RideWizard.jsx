@@ -11,6 +11,7 @@ import StepNavigation from "./StepNavigation";
 import { useRide } from "../../context/RideContext";
 import { createRide } from "../../services/rideService";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const RideWizard = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -117,9 +118,9 @@ const RideWizard = () => {
 
       navigate("/post-ride/success");
     } catch (error) {
-      console.error(error);
+      toast.error(error?.response?.data?.message || "Failure to Publish ride");
 
-      navigate("/post-ride/failure");
+
     } finally {
       setPublishing(false);
     }
