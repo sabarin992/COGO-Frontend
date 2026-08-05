@@ -1,9 +1,12 @@
-import React from 'react'
+import { RideProvider } from "../../context/RideContext";
+import RideWizard from "../../components/ride/RideWizard";
 
 const PostRide = () => {
   return (
-    <div>PostRide</div>
-  )
-}
+    <RideProvider>
+      <RideWizard />
+    </RideProvider>
+  );
+};
 
-export default PostRide
+export default PostRide;
