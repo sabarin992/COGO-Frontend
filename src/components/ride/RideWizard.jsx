@@ -23,7 +23,15 @@ const RideWizard = () => {
     <ReviewRideStep />,
   ];
 
-  //   field validation
+  if (currentStep === 3) {
+    if (!rideData.travel_date) {
+      alert("Please select travel date.");
+
+      return false;
+    }
+  }
+
+  //   field validation for source, destination and seat availabilty
 
   const validateCurrentStep = () => {
     if (currentStep === 0) {
@@ -56,7 +64,6 @@ const RideWizard = () => {
 
     return true;
   };
-
 
   const nextStep = () => {
     if (!validateCurrentStep()) {

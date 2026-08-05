@@ -10,7 +10,7 @@ export const RideProvider = ({ children }) => {
 
     route: "",
 
-    travel_date: "",
+    travel_date: null,
     travel_time: "",
 
     vehicle_id: null,
@@ -34,7 +34,7 @@ export const RideProvider = ({ children }) => {
       destination: "",
       available_seats: 1,
       route: "",
-      travel_date: "",
+      travel_date: null,
       travel_time: "",
       vehicle_id: null,
     });
