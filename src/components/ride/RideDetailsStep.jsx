@@ -15,10 +15,7 @@ const RideDetailsStep = () => {
     });
   };
 
-  useEffect(()=>{
-        console.log(rideData);
-        
-  },[rideData])
+  
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow p-8">

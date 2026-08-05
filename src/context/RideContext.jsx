@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const RideContext = createContext();
 
@@ -15,6 +15,11 @@ export const RideProvider = ({ children }) => {
 
     vehicle_id: null,
   });
+
+  useEffect(()=>{
+        console.log(rideData);
+        
+  },[rideData])
 
   const updateRideData = (data) => {
     setRideData((prev) => ({
