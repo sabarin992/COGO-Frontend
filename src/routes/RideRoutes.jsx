@@ -46,4 +46,3 @@ export default RideRoutes;
 //   },
 // ];
 
-export default RideRoutes;
