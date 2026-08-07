@@ -28,7 +28,8 @@ const Header = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           
           {/* Left Logo */}
-          <div className="text-3xl font-black tracking-tight text-black">
+          <div className="text-3xl font-black tracking-tight text-black cursor-pointer"
+          onClick={()=>{navigate("/")}}>
             COGO
           </div>
 
@@ -42,8 +43,11 @@ const Header = () => {
             </a>
 
             <a
-              href="#"
-              className="text-gray-600 hover:text-black transition duration-200 font-semibold"
+        
+              className="text-gray-600 hover:text-black transition duration-200 font-semibold cursor-pointer"
+              onClick={()=>{
+                navigate("/ride/post-ride")
+              }}
             >
               Post a Ride
             </a>
@@ -137,7 +141,7 @@ const Header = () => {
                 Find a Ride
               </a>
 
-              <a href="#" className="text-gray-600 hover:text-black transition">
+              <a className="text-gray-600 hover:text-black transition" onClick={()=>{navigate("/post-ride")}}>
                 Post a Ride
               </a>
 

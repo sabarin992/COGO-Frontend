@@ -17,7 +17,7 @@ export const createVehicle = async (formData) => {
  */
 export const getVehicles = async () => {
   const response = await api.get("/vehicles");
-  return response;
+  return response?.data;
 };
 
 /**
@@ -25,7 +25,7 @@ export const getVehicles = async () => {
  */
 export const getVehicleById = async (vehicleId) => {
   const response = await api.get(`/vehicles/${vehicleId}`);
-  return response;
+  return response.data;
 };
 
 /**

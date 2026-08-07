@@ -105,8 +105,10 @@ const AddVehicle = () => {
       navigate("/profile/vehicles");
 
     } catch (error) {
+      console.log(error.response);
+      
       toast.error(
-        error.response?.data?.detail ??
+        error.response?.data?.message ??
           "Failed to create vehicle."
       );
     } finally {
