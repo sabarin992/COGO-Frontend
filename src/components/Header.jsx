@@ -46,7 +46,7 @@ const Header = () => {
         
               className="text-gray-600 hover:text-black transition duration-200 font-semibold cursor-pointer"
               onClick={()=>{
-                navigate("/post-ride")
+                navigate("/ride/post-ride")
               }}
             >
               Post a Ride

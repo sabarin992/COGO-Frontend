@@ -34,3 +34,8 @@ export const createRide = async (rideData) => {
 
   return response.data;
 };
+
+export const getMyRides = async () => {
+  const response = await api.get("/ride/my-rides");
+  return response.data;
+};

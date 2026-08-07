@@ -116,7 +116,7 @@ const RideWizard = () => {
 
       resetRideData();
 
-      navigate("/post-ride/success");
+      navigate("/ride/post-ride/success");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failure to Publish ride");
 
@@ -147,7 +147,7 @@ const RideWizard = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4">
+    <div className="max-w-[1600px] mx-auto py-10 px-6">
       <ProgressIndicator currentStep={currentStep} />
 
       {steps[currentStep]}

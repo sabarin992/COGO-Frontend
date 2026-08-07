@@ -3,10 +3,11 @@ import RideSuccess from "../pages/ride/RideSuccess";
 import RideFailure from "../pages/ride/RideFailure";
 import ProtectedRoute from "../components/ProtectedRoute";
 import UserLayout from "../layouts/UserLayout";
+import MyRides from "../pages/ride/MyRides";
 
 const RideRoutes = [
   {
-    path: "/post-ride",
+    path: "/ride",
     element: (
       <ProtectedRoute>
         <UserLayout />
@@ -14,15 +15,19 @@ const RideRoutes = [
     ),
     children: [
       {
-        path: "",
+        path: "post-ride",
         element: <PostRide />,
       },
       {
-        path: "success",
+        path: "my-rides",
+        element: <MyRides />,
+      },
+      {
+        path: "post-ride/success",
         element: <RideSuccess />,
       },
       {
-        path: "failure",
+        path: "post-ride/failure",
         element: <RideFailure />,
       },
     ],
@@ -45,4 +50,3 @@ export default RideRoutes;
 //     element: <RideFailure />,
 //   },
 // ];
-
