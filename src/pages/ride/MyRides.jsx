@@ -4,10 +4,12 @@ import { getMyRides } from "../../services/rideService";
 import RideGrid from "../../components/ride/RideGrid";
 import EmptyRideState from "../../components/ride/EmptyRideState";
 import RideSkeleton from "../../components/ride/RideSkeleton";
+import { useNavigate } from "react-router-dom";
 
 const MyRides = () => {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMyRides = async () => {
@@ -53,7 +55,7 @@ const MyRides = () => {
       <RideGrid
         rides={rides}
         onView={(ride) => {
-          console.log("Selected Ride:", ride);
+          navigate(`/ride/my-rides/${ride.ride_id}`);
         }}
       />
     </div>
