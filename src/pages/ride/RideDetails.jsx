@@ -56,14 +56,24 @@ const RideDetails = () => {
       {/* Ride Details Card */}
       <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Route Header */}
-        <div className="bg-black text-white px-8 py-7">
-          <p className="text-sm text-gray-400 uppercase tracking-wider">
-            Route
-          </p>
+        <div className="flex bg-black text-white px-8 py-7 justify-between">
+          <div>
+            <p className="text-sm text-gray-400 uppercase tracking-wider">
+              Route
+            </p>
 
-          <h2 className="text-3xl font-bold mt-2">
-            {ride.source} → {ride.destination}
-          </h2>
+            <h2 className="text-3xl font-bold mt-2">
+              {ride.source} → {ride.destination}
+            </h2>
+          </div>
+          <div className="flex gap-3">
+            <h2 className="text-3xl font-bold mt-2 cursor-pointer" onClick={()=>{navigate(`/ride/my-rides/edit/${rideId}`)}}>
+              Edit
+            </h2>
+            <h2 className="text-3xl font-bold mt-2">
+              Delete
+            </h2>
+          </div>
         </div>
 
         {/* Details */}
@@ -138,8 +148,7 @@ const RideDetails = () => {
         </div>
       </div>
 
-
-    {/* Back to my rides */}
+      {/* Back to my rides */}
       <button
         onClick={() => navigate("/ride/my-rides")}
         className="mt-8 px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold transition"

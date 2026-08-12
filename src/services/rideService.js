@@ -40,8 +40,12 @@ export const getMyRides = async () => {
 
 // Get a single ride by its ID
 export const getRideById = async (rideId) => {
-  const response = await api.get(`/ride/${rideId}`);
-  console.log(response.data);
-  
+  const response = await api.get(`/ride/${rideId}`);  
+  return response.data;
+};
+
+// Update a single ride by its ID
+export const updateRide = async (rideId, rideData) => {
+  const response = await api.put(`/ride/${rideId}`, rideData);
   return response.data;
 };

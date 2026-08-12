@@ -5,6 +5,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import UserLayout from "../layouts/UserLayout";
 import MyRides from "../pages/ride/MyRides";
 import RideDetails from "../pages/ride/RideDetails";
+import EditRide from "../pages/ride/EditRide";
 
 const RideRoutes = [
   {
@@ -26,6 +27,10 @@ const RideRoutes = [
       {
         path: "my-rides/:rideId",
         element: <RideDetails />,
+      },
+      {
+        path: "my-rides/edit/:rideId",
+        element: <EditRide />,
       },
       {
         path: "post-ride/success",
