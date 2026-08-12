@@ -26,16 +26,22 @@ export const getRoutes = async (source, destination) => {
   ];
 };
 
-
-
-
+// Create a new ride
 export const createRide = async (rideData) => {
   const response = await api.post("/ride", rideData);
-
   return response.data;
 };
 
+// Get all rides created by the logged-in user
 export const getMyRides = async () => {
   const response = await api.get("/ride/my-rides");
+  return response.data;
+};
+
+// Get a single ride by its ID
+export const getRideById = async (rideId) => {
+  const response = await api.get(`/ride/${rideId}`);
+  console.log(response.data);
+  
   return response.data;
 };

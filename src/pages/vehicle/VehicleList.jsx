@@ -71,7 +71,7 @@ const VehicleList = () => {
       setSelectedVehicle(null);
     } catch (error) {
       toast.error(
-        error.response?.data?.detail || "Failed to delete vehicle."
+        error.response?.data?.message || "Failed to delete vehicle."
       );
     } finally {
       setDeleting(false);
