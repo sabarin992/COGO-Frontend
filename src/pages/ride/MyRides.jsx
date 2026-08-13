@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 
-import { getMyRides } from "../../services/rideService";
+import { getMyRides, deleteRide } from "../../services/rideService";
 import RideGrid from "../../components/ride/RideGrid";
 import EmptyRideState from "../../components/ride/EmptyRideState";
 import RideSkeleton from "../../components/ride/RideSkeleton";
 import { useNavigate } from "react-router-dom";
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import { toast } from "react-toastify";
 
 const MyRides = () => {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRide, setSelectedRide] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +30,38 @@ const MyRides = () => {
 
     fetchMyRides();
   }, []);
+
+  //   Delete Ride
+  const handleDeleteClick = (ride) => {
+    setSelectedRide(ride);
+    setShowDeleteModal(true);
+  };
+
+  //   Confirm Delete function
+  const handleConfirmDelete = async () => {
+    if (!selectedRide) return;
+
+    try {
+      await deleteRide(selectedRide.ride_id);
+
+      setRides((currentRides) =>
+        currentRides.filter(
+          (currentRide) => currentRide.ride_id !== selectedRide.ride_id,
+        ),
+      );
+
+      setShowDeleteModal(false);
+      setSelectedRide(null);
+
+      toast.success("Ride deleted successfully.");
+    } catch (error) {
+      console.error("Failed to delete ride:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to delete ride. Please try again.",
+      );
+    }
+  };
 
   // Loading State
   if (loading) {
@@ -57,6 +93,22 @@ const MyRides = () => {
         onView={(ride) => {
           navigate(`/ride/my-rides/${ride.ride_id}`);
         }}
+        onDelete={handleDeleteClick}
+      />
+
+      {/* Ride Deletion Confirmation modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedRide(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Ride?"
+        message="Are you sure you want to delete this ride? This action cannot be undone."
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        type="danger"
       />
     </div>
   );

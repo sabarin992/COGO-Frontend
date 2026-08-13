@@ -49,3 +49,9 @@ export const updateRide = async (rideId, rideData) => {
   const response = await api.put(`/ride/${rideId}`, rideData);
   return response.data;
 };
+
+// Delete a single ride by its ID
+export const deleteRide = async (rideId) => {
+  const response = await api.delete(`/ride/${rideId}`);
+  return response.data;
+};
