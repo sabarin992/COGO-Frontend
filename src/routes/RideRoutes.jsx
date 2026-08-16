@@ -6,6 +6,9 @@ import UserLayout from "../layouts/UserLayout";
 import MyRides from "../pages/ride/MyRides";
 import RideDetails from "../pages/ride/RideDetails";
 import EditRide from "../pages/ride/EditRide";
+import SearchRides from "../pages/ride/SearchRides";
+import RideReview from "../pages/ride/RideReview";
+import RideRequestSuccess from "../pages/ride/RideRequestSuccess";
 
 const RideRoutes = [
   {
@@ -40,23 +43,24 @@ const RideRoutes = [
         path: "post-ride/failure",
         element: <RideFailure />,
       },
+      {
+        path: "search",
+        element: <SearchRides />,
+      },
+      {
+        path: "/ride/:rideId/details",
+        element: <RideDetails />,
+      },
+      {
+        path: "/ride/:rideId/review",
+        element: <RideReview />,
+      },
+      {
+        path: "/ride/request-success",
+        element: <RideRequestSuccess />,
+      },
     ],
   },
 ];
 
 export default RideRoutes;
-
-// [
-//   {
-//     path: "/post-ride",
-//     element: <PostRide />,
-//   },
-//   {
-//     path: "/ride/success",
-//     element: <RideSuccess />,
-//   },
-//   {
-//     path: "/ride/failure",
-//     element: <RideFailure />,
-//   },
-// ];

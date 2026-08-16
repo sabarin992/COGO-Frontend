@@ -38,9 +38,15 @@ export const getMyRides = async () => {
   return response.data;
 };
 
-// Get a single ride by its ID
+// Get a single ride by its ID for rider
 export const getRideById = async (rideId) => {
   const response = await api.get(`/ride/${rideId}`);  
+  return response.data;
+};
+
+// Get complete ride details for passengers
+export const getRideDetails = async (rideId) => {
+  const response = await api.get(`/ride/${rideId}/details`);
   return response.data;
 };
 
@@ -55,3 +61,17 @@ export const deleteRide = async (rideId) => {
   const response = await api.delete(`/ride/${rideId}`);
   return response.data;
 };
+
+// Search for available rides
+export const searchRides = async (searchData) => {
+  const response = await api.post("/ride/search", searchData);
+  return response.data;
+};
+
+
+// Request a ride
+export const requestRide = async (requestData) => {
+  const response = await api.post("/ride/request", requestData);
+  return response.data;
+};
+
