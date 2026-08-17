@@ -22,6 +22,9 @@ const RideWizard = () => {
 
   const [publishing, setPublishing] = useState(false);
 
+  console.log(currentStep);
+  console.log(rideData?.vehicle_id);
+
   const steps = [
     <RideDetailsStep />,
     <RouteSelectionStep />,
@@ -31,56 +34,53 @@ const RideWizard = () => {
     <ReviewRideStep />,
   ];
 
-  if (currentStep === 3) {
-    if (!rideData.travel_date) {
-      alert("Please select travel date.");
-
-      return false;
-    }
-  }
-
-  if (currentStep === 4) {
-    if (!rideData.travel_time) {
-      alert("Please select departure time.");
-      return false;
-    }
-  }
-
-  if (currentStep === 5) {
-    if (!rideData.vehicle_id) {
-      alert("Please select a vehicle.");
-
-      return false;
-    }
-  }
-
-  //   field validation for source, destination and seat availabilty
-
   const validateCurrentStep = () => {
+    // Step 0 - Ride details
     if (currentStep === 0) {
       if (!rideData.source.trim()) {
         alert("Please enter source.");
-
         return false;
       }
 
       if (!rideData.destination.trim()) {
         alert("Please enter destination.");
-
         return false;
       }
 
       if (rideData.available_seats <= 0) {
         alert("Available seats must be greater than zero.");
-
         return false;
       }
     }
 
+    // Step 1 - Route
     if (currentStep === 1) {
       if (!rideData.route) {
         alert("Please select a route.");
+        return false;
+      }
+    }
 
+    // Step 2 - Date
+    if (currentStep === 2) {
+      if (!rideData.travel_date) {
+        alert("Please select travel date.");
+        return false;
+      }
+    }
+
+    // Step 3 - Time
+    if (currentStep === 3) {
+      if (!rideData.travel_time) {
+        alert("Please select departure time.");
+        return false;
+      }
+    }
+
+    // Step 4 - Vehicle
+    if (currentStep === 4) {
+      if (!rideData.vehicle_id) {
+        alert("Please select a vehicle.");
         return false;
       }
     }
@@ -119,8 +119,6 @@ const RideWizard = () => {
       navigate("/ride/post-ride/success");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failure to Publish ride");
-
-
     } finally {
       setPublishing(false);
     }
