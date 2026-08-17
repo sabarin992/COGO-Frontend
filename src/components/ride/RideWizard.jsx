@@ -112,13 +112,24 @@ const RideWizard = () => {
         vehicle_id: rideData.vehicle_id,
       };
 
-      await createRide(payload);
+      const response = await createRide(payload);
 
       resetRideData();
 
-      navigate("/ride/post-ride/success");
+      navigate("/ride/post-ride/success", {
+        state: {
+          ride: response,
+        },
+      });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failure to Publish ride");
+      const message =
+        error?.response?.data?.message || "Failure to publish ride.";
+
+      navigate("/ride/post-ride/failure", {
+        state: {
+          message,
+        },
+      });
     } finally {
       setPublishing(false);
     }
