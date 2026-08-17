@@ -75,3 +75,31 @@ export const requestRide = async (requestData) => {
   return response.data;
 };
 
+// Get all requests for a ride
+export const getRideRequests = async (rideId) => {
+  const response = await api.get(
+    `/ride/${rideId}/requests`
+  );
+
+  return response.data;
+};
+
+
+// Accept a ride request
+export const acceptRideRequest = async (rideRequestId) => {
+  const response = await api.post(
+    `/ride/requests/${rideRequestId}/accept`
+  );
+
+  return response.data;
+};
+
+// Reject a ride request
+export const rejectRideRequest = async (rideRequestId) => {
+  const response = await api.post(
+    `/ride/requests/${rideRequestId}/reject`
+  );
+
+  return response.data;
+};
+

@@ -9,6 +9,7 @@ import EditRide from "../pages/ride/EditRide";
 import SearchRides from "../pages/ride/SearchRides";
 import RideReview from "../pages/ride/RideReview";
 import RideRequestSuccess from "../pages/ride/RideRequestSuccess";
+import RideRequests from "../pages/ride/RideRequests";
 
 const RideRoutes = [
   {
@@ -58,6 +59,10 @@ const RideRoutes = [
       {
         path: "/ride/request-success",
         element: <RideRequestSuccess />,
+      },
+      {
+        path: "/ride/:rideId/requests",
+        element: <RideRequests />,
       },
     ],
   },
