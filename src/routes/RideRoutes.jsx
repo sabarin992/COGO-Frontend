@@ -30,7 +30,7 @@ const RideRoutes = [
       },
       {
         path: "my-rides/:rideId",
-        element: <RideDetails />,
+        element:<RideDetails mode="my-ride" />
       },
       {
         path: "my-rides/edit/:rideId",
@@ -50,7 +50,7 @@ const RideRoutes = [
       },
       {
         path: "/ride/:rideId/details",
-        element: <RideDetails />,
+        element: <RideDetails mode="search" />,
       },
       {
         path: "/ride/:rideId/review",

@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import {
   ArrowLeft,
@@ -17,7 +13,7 @@ import {
 
 import { getRideDetails } from "../../services/rideService";
 
-const RideDetails = () => {
+const RideDetails = ({ mode }) => {
   const { rideId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +24,8 @@ const RideDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const isSearchMode = mode === "search";
+  
   useEffect(() => {
     const fetchRideDetails = async () => {
       try {
@@ -38,14 +36,10 @@ const RideDetails = () => {
 
         setRide(data);
       } catch (error) {
-        console.error(
-          "Failed to fetch ride details:",
-          error
-        );
+        console.error("Failed to fetch ride details:", error);
 
         setError(
-          error?.response?.data?.detail ||
-            "Unable to load ride details."
+          error?.response?.data?.detail || "Unable to load ride details.",
         );
       } finally {
         setLoading(false);
@@ -56,9 +50,7 @@ const RideDetails = () => {
   }, [rideId]);
 
   const formatDate = (date) => {
-    return new Date(
-      `${date}T00:00:00`
-    ).toLocaleDateString("en-IN", {
+    return new Date(`${date}T00:00:00`).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -66,9 +58,7 @@ const RideDetails = () => {
   };
 
   const formatTime = (time) => {
-    return new Date(
-      `1970-01-01T${time}`
-    ).toLocaleTimeString("en-IN", {
+    return new Date(`1970-01-01T${time}`).toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
@@ -87,9 +77,7 @@ const RideDetails = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-600">
-          Loading ride details...
-        </p>
+        <p className="text-gray-600">Loading ride details...</p>
       </div>
     );
   }
@@ -118,9 +106,7 @@ const RideDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
-
       <div className="mx-auto max-w-5xl">
-
         {/* Back */}
         <button
           type="button"
@@ -133,9 +119,7 @@ const RideDetails = () => {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Ride Details
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Ride Details</h1>
 
           <p className="mt-2 text-gray-600">
             Review the ride details before continuing.
@@ -144,33 +128,24 @@ const RideDetails = () => {
 
         {/* Route */}
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-
           <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
             Route
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
                 <MapPin size={20} />
               </div>
 
               <div>
-                <p className="text-xs text-gray-500">
-                  From
-                </p>
+                <p className="text-xs text-gray-500">From</p>
 
-                <p className="font-semibold text-gray-900">
-                  {ride.source}
-                </p>
+                <p className="font-semibold text-gray-900">{ride.source}</p>
               </div>
             </div>
 
-            <ArrowRight
-              size={20}
-              className="hidden text-gray-400 sm:block"
-            />
+            <ArrowRight size={20} className="hidden text-gray-400 sm:block" />
 
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
@@ -178,43 +153,32 @@ const RideDetails = () => {
               </div>
 
               <div>
-                <p className="text-xs text-gray-500">
-                  To
-                </p>
+                <p className="text-xs text-gray-500">To</p>
 
                 <p className="font-semibold text-gray-900">
                   {ride.destination}
                 </p>
               </div>
             </div>
-
           </div>
 
           {ride.route && (
             <div className="mt-5 border-t border-gray-100 pt-5">
-              <p className="text-xs text-gray-500">
-                Route
-              </p>
+              <p className="text-xs text-gray-500">Route</p>
 
-              <p className="mt-1 text-sm text-gray-700">
-                {ride.route}
-              </p>
+              <p className="mt-1 text-sm text-gray-700">{ride.route}</p>
             </div>
           )}
-
         </div>
 
         {/* Date & Seats */}
         <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
-
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
               <CalendarDays size={20} />
             </div>
 
-            <p className="text-xs text-gray-500">
-              Travel Date
-            </p>
+            <p className="text-xs text-gray-500">Travel Date</p>
 
             <p className="mt-1 font-semibold text-gray-900">
               {formatDate(ride.travel_date)}
@@ -226,9 +190,7 @@ const RideDetails = () => {
               <Clock3 size={20} />
             </div>
 
-            <p className="text-xs text-gray-500">
-              Travel Time
-            </p>
+            <p className="text-xs text-gray-500">Travel Time</p>
 
             <p className="mt-1 font-semibold text-gray-900">
               {formatTime(ride.travel_time)}
@@ -240,26 +202,21 @@ const RideDetails = () => {
               <Users size={20} />
             </div>
 
-            <p className="text-xs text-gray-500">
-              Available Seats
-            </p>
+            <p className="text-xs text-gray-500">Available Seats</p>
 
             <p className="mt-1 font-semibold text-gray-900">
               {ride.available_seats}
             </p>
           </div>
-
         </div>
 
         {/* Driver */}
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-
           <p className="mb-5 text-xs font-semibold uppercase tracking-wide text-gray-500">
             Driver
           </p>
 
           <div className="flex items-center gap-4">
-
             {ride.driver.profile_pic ? (
               <img
                 src={ride.driver.profile_pic}
@@ -268,9 +225,7 @@ const RideDetails = () => {
               />
             ) : (
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200 text-xl font-semibold text-gray-600">
-                {ride.driver.full_name
-                  ?.charAt(0)
-                  ?.toUpperCase()}
+                {ride.driver.full_name?.charAt(0)?.toUpperCase()}
               </div>
             )}
 
@@ -279,18 +234,13 @@ const RideDetails = () => {
                 {ride.driver.full_name}
               </h2>
 
-              <p className="text-sm text-gray-500">
-                Ride Driver
-              </p>
+              <p className="text-sm text-gray-500">Ride Driver</p>
             </div>
-
           </div>
-
         </div>
 
         {/* Vehicle */}
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
               <Car size={20} />
@@ -302,18 +252,14 @@ const RideDetails = () => {
               </p>
 
               <h2 className="font-semibold text-gray-900">
-                {ride.vehicle.brand}{" "}
-                {ride.vehicle.model}
+                {ride.vehicle.brand} {ride.vehicle.model}
               </h2>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-
             <div>
-              <p className="text-xs text-gray-500">
-                Type
-              </p>
+              <p className="text-xs text-gray-500">Type</p>
 
               <p className="mt-1 font-medium text-gray-900">
                 {ride.vehicle.vehicle_type}
@@ -321,9 +267,7 @@ const RideDetails = () => {
             </div>
 
             <div>
-              <p className="text-xs text-gray-500">
-                Year
-              </p>
+              <p className="text-xs text-gray-500">Year</p>
 
               <p className="mt-1 font-medium text-gray-900">
                 {ride.vehicle.year}
@@ -331,9 +275,7 @@ const RideDetails = () => {
             </div>
 
             <div>
-              <p className="text-xs text-gray-500">
-                Color
-              </p>
+              <p className="text-xs text-gray-500">Color</p>
 
               <p className="mt-1 font-medium text-gray-900">
                 {ride.vehicle.color}
@@ -341,24 +283,18 @@ const RideDetails = () => {
             </div>
 
             <div>
-              <p className="text-xs text-gray-500">
-                Registration
-              </p>
+              <p className="text-xs text-gray-500">Registration</p>
 
               <p className="mt-1 font-medium text-gray-900">
                 {ride.vehicle.registration_number}
               </p>
             </div>
-
           </div>
-
         </div>
 
         {/* Passengers */}
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-
           <div className="mb-5 flex items-center justify-between">
-
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 Passengers
@@ -373,7 +309,6 @@ const RideDetails = () => {
               <Users size={18} />
               {ride.passengers.length}
             </div>
-
           </div>
 
           {ride.passengers.length === 0 ? (
@@ -382,15 +317,12 @@ const RideDetails = () => {
             </p>
           ) : (
             <div className="space-y-4">
-
               {ride.passengers.map((passenger) => (
                 <div
                   key={passenger.id}
                   className="flex items-center justify-between rounded-xl bg-gray-50 p-4"
                 >
-
                   <div className="flex items-center gap-3">
-
                     {passenger.profile_pic ? (
                       <img
                         src={passenger.profile_pic}
@@ -399,9 +331,7 @@ const RideDetails = () => {
                       />
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 font-semibold text-gray-600">
-                        {passenger.full_name
-                          ?.charAt(0)
-                          ?.toUpperCase()}
+                        {passenger.full_name?.charAt(0)?.toUpperCase()}
                       </div>
                     )}
 
@@ -410,55 +340,44 @@ const RideDetails = () => {
                         {passenger.full_name}
                       </p>
 
-                      <p className="text-xs text-gray-500">
-                        Passenger
-                      </p>
+                      <p className="text-xs text-gray-500">Passenger</p>
                     </div>
-
                   </div>
 
                   <p className="text-sm text-gray-600">
                     {passenger.seats_requested}{" "}
-                    {passenger.seats_requested === 1
-                      ? "seat"
-                      : "seats"}
+                    {passenger.seats_requested === 1 ? "seat" : "seats"}
                   </p>
-
                 </div>
               ))}
-
             </div>
           )}
-
         </div>
 
         {/* Selected seats + Next */}
-        <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        {isSearchMode && (
+          <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Your Request
+              </p>
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Your Request
-            </p>
+              <p className="mt-1 text-lg font-semibold text-gray-900">
+                {seatRequired || 1} {seatRequired === 1 ? "seat" : "seats"}
+              </p>
+            </div>
 
-            <p className="mt-1 text-lg font-semibold text-gray-900">
-              {seatRequired || 1}{" "}
-              {seatRequired === 1 ? "seat" : "seats"}
-            </p>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="flex items-center justify-center gap-2 rounded-xl bg-black px-7 py-3 font-medium text-white transition hover:bg-gray-800"
+            >
+              Next
+              <ArrowRight size={18} />
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center justify-center gap-2 rounded-xl bg-black px-7 py-3 font-medium text-white transition hover:bg-gray-800"
-          >
-            Next
-            <ArrowRight size={18} />
-          </button>
-
-        </div>
-
+        )}
       </div>
-
     </div>
   );
 };
