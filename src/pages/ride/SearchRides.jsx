@@ -8,7 +8,7 @@ const SearchRides = () => {
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   const [travelDate, setTravelDate] = useState("");
-  const [travelTime, setTravelTime] = useState("");
+  const [travelTime, setTravelTime] = useState(null);
   const [seatRequired, setSeatRequired] = useState(1);
 
   const [rides, setRides] = useState([]);
@@ -50,10 +50,10 @@ const SearchRides = () => {
       return;
     }
 
-    if (!travelTime) {
-      setError("Please select a travel time.");
-      return;
-    }
+    // if (!travelTime) {
+    //   setError("Please select a travel time.");
+    //   return;
+    // }
 
     // if (travelDate === today && travelTime < currentTime) {
     //   setError("Please select a future time.");
@@ -80,6 +80,8 @@ const SearchRides = () => {
 
       setRides(data);
     } catch (error) {
+        console.log(error.response);
+        
       console.error("Failed to search rides:", error);
 
       setRides([]);
