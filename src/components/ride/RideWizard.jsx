@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import RideDetailsStep from "./RideDetailsStep";
 import RouteSelectionStep from "./RouteSelectionStep";
 import DateSelectionStep from "./DateSelectionStep";
@@ -15,43 +14,34 @@ import { toast } from "react-toastify";
 
 const RideWizard = () => {
   const [currentStep, setCurrentStep] = useState(0);
-
   const navigate = useNavigate();
-
   const { rideData, resetRideData } = useRide();
-
   const [publishing, setPublishing] = useState(false);
 
-  console.log(currentStep);
-  console.log(rideData?.vehicle_id);
-
   const steps = [
-    <RideDetailsStep />,
-    <RouteSelectionStep />,
-    <DateSelectionStep />,
-    <TimeSelectionStep />,
-    <VehicleSelectionStep />,
-    <ReviewRideStep />,
+    <RideDetailsStep key="details" />,
+    <RouteSelectionStep key="route" />,
+    <DateSelectionStep key="date" />,
+    <TimeSelectionStep key="time" />,
+    <VehicleSelectionStep key="vehicle" />,
+    <ReviewRideStep key="review" />,
   ];
-
-  console.log(rideData);
-  
 
   const validateCurrentStep = () => {
     // Step 0 - Ride details
     if (currentStep === 0) {
-      if (!rideData.source.trim()) {
-        alert("Please enter source.");
+      if (!rideData.source || !rideData.source.trim()) {
+        toast.error("Please enter a source location.");
         return false;
       }
 
-      if (!rideData.destination.trim()) {
-        alert("Please enter destination.");
+      if (!rideData.destination || !rideData.destination.trim()) {
+        toast.error("Please enter a destination location.");
         return false;
       }
 
-      if (rideData.available_seats <= 0) {
-        alert("Available seats must be greater than zero.");
+      if (!rideData.available_seats || rideData.available_seats <= 0) {
+        toast.error("Available seats must be at least 1.");
         return false;
       }
     }
@@ -59,7 +49,7 @@ const RideWizard = () => {
     // Step 1 - Route
     if (currentStep === 1) {
       if (!rideData.route) {
-        alert("Please select a route.");
+        toast.error("Please select a route.");
         return false;
       }
     }
@@ -67,7 +57,7 @@ const RideWizard = () => {
     // Step 2 - Date
     if (currentStep === 2) {
       if (!rideData.travel_date) {
-        alert("Please select travel date.");
+        toast.error("Please select travel date.");
         return false;
       }
     }
@@ -75,7 +65,7 @@ const RideWizard = () => {
     // Step 3 - Time
     if (currentStep === 3) {
       if (!rideData.travel_time) {
-        alert("Please select departure time.");
+        toast.error("Please select departure time.");
         return false;
       }
     }
@@ -83,7 +73,7 @@ const RideWizard = () => {
     // Step 4 - Vehicle
     if (currentStep === 4) {
       if (!rideData.vehicle_id) {
-        alert("Please select a vehicle.");
+        toast.error("Please select a vehicle.");
         return false;
       }
     }
@@ -91,7 +81,7 @@ const RideWizard = () => {
     return true;
   };
 
-  //   publish ride function
+  // Publish ride function
   const publishRide = async () => {
     try {
       setPublishing(true);
@@ -138,20 +128,19 @@ const RideWizard = () => {
     }
   };
 
-  //   next button
+  // Next button handler
   const nextStep = async () => {
     if (!validateCurrentStep()) return;
 
     if (currentStep === steps.length - 1) {
       await publishRide();
-
       return;
     }
 
     setCurrentStep((prev) => prev + 1);
   };
 
-  //   previous button
+  // Previous button handler
   const previousStep = () => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
@@ -159,18 +148,35 @@ const RideWizard = () => {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto py-10 px-6">
-      <ProgressIndicator currentStep={currentStep} />
+    <div className="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Wizard Header Banner */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
+            Offer a Ride
+          </h1>
+          <p className="mt-2 text-sm text-gray-600 max-w-md mx-auto">
+            Share your trip details and help fellow commuters travel together comfortably.
+          </p>
+        </div>
 
-      {steps[currentStep]}
+        {/* Progress Indicator Header */}
+        <ProgressIndicator currentStep={currentStep} />
 
-      <StepNavigation
-        currentStep={currentStep}
-        totalSteps={steps.length}
-        nextStep={nextStep}
-        previousStep={previousStep}
-        loading={publishing}
-      />
+        {/* Step Component */}
+        <div className="mt-4 transition-all duration-300">
+          {steps[currentStep]}
+        </div>
+
+        {/* Navigation Bar */}
+        <StepNavigation
+          currentStep={currentStep}
+          totalSteps={steps.length}
+          nextStep={nextStep}
+          previousStep={previousStep}
+          loading={publishing}
+        />
+      </div>
     </div>
   );
 };

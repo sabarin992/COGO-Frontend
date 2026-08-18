@@ -74,31 +74,31 @@ const SearchRides = () => {
       seat_required: seatRequired,
     };
 
-    console.log(searchData);
+
     
 
-    return;
 
-    // try {
-    //   setLoading(true);
 
-    //   const data = await searchRides(searchData);
+    try {
+      setLoading(true);
 
-    //   setRides(data);
-    // } catch (error) {
-    //     console.log(error.response);
+      const data = await searchRides(searchData);
+
+      setRides(data);
+    } catch (error) {
+        console.log(error.response);
         
-    //   console.error("Failed to search rides:", error);
+      console.error("Failed to search rides:", error);
 
-    //   setRides([]);
+      setRides([]);
 
-    //   setError(
-    //     error?.response?.data?.detail ||
-    //       "Unable to search rides. Please try again.",
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
+      setError(
+        error?.response?.data?.detail ||
+          "Unable to search rides. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
