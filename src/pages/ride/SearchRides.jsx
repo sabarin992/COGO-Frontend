@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Search, MapPin, Calendar, Clock, Users } from "lucide-react";
-
+import { Search, Calendar, Clock, Users, Loader2 } from "lucide-react";
 import { searchRides } from "../../services/rideService";
 import RideSearchList from "../../components/ride/RideSearchList";
 import SearchBox from "../../components/common/SearchBox";
@@ -15,29 +14,14 @@ const SearchRides = () => {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Get today's date using local browser time
-  const now = new Date();
-
-  const today = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("-");
-
-  // Get current local time
-  const currentTime = [
-    String(now.getHours()).padStart(2, "0"),
-    String(now.getMinutes()).padStart(2, "0"),
-  ].join(":");
+  const [searched, setSearched] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-
     setError("");
 
     if (!source.trim()) {
-      setError("Please enter your source.");
+      setError("Please enter your starting location.");
       return;
     }
 
@@ -50,16 +34,6 @@ const SearchRides = () => {
       setError("Please select a travel date.");
       return;
     }
-
-    // if (!travelTime) {
-    //   setError("Please select a travel time.");
-    //   return;
-    // }
-
-    // if (travelDate === today && travelTime < currentTime) {
-    //   setError("Please select a future time.");
-    //   return;
-    // }
 
     if (seatRequired < 1) {
       setError("At least one seat is required.");
@@ -74,47 +48,43 @@ const SearchRides = () => {
       seat_required: seatRequired,
     };
 
-
-    
-
-
-
     try {
       setLoading(true);
-
+      setSearched(true);
       const data = await searchRides(searchData);
-
-      setRides(data);
-    } catch (error) {
-        console.log(error.response);
-        
-      console.error("Failed to search rides:", error);
-
-      setRides([]);
-
-      setError(
-        error?.response?.data?.detail ||
-          "Unable to search rides. Please try again.",
-      );
+      setRides(data || []);
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        setRides([]);
+      } else {
+        console.error("Failed to search rides:", err);
+        setRides([]);
+        setError(
+          err?.response?.data?.detail ||
+            err?.response?.data?.message ||
+            "Unable to search rides. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
+    <div className="min-h-screen bg-gray-50/50 px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-6xl">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Find a Ride</h1>
-
-          <p className="mt-2 text-gray-600">
-            Search for a ride that matches your journey.
+        {/* Hero Header */}
+        <div className="mb-8 text-center sm:text-left">
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
+            Find Your Ride
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
+            Search for available rides matching your journey, schedule, and seat requirements.
           </p>
         </div>
 
-        {/* Search Form */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
+        {/* Search Card */}
+        <div className="rounded-2xl bg-white p-6 md:p-8 shadow-sm border border-gray-100">
           <form onSubmit={handleSearch}>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-5">
               {/* Source */}
@@ -123,7 +93,7 @@ const SearchRides = () => {
                 name="source"
                 value={source}
                 onChange={(val) => setSource(val)}
-                placeholder="Enter source"
+                placeholder="Where from?"
               />
 
               {/* Destination */}
@@ -132,54 +102,43 @@ const SearchRides = () => {
                 name="destination"
                 value={destination}
                 onChange={(val) => setDestination(val)}
-                placeholder="Enter destination"
+                placeholder="Where to?"
               />
-
 
               {/* Date */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Date
+                  Date <span className="text-red-500">*</span>
                 </label>
-
                 <div className="relative">
                   <Calendar
                     size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
-
                   <input
                     type="date"
-                    // min={today}
                     value={travelDate}
                     onChange={(e) => setTravelDate(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none transition focus:border-black"
+                    className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
 
-              {/* Time */}
+              {/* Departure Time */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                   Time
                 </label>
-
                 <div className="relative">
                   <Clock
                     size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
-
                   <input
                     type="time"
-                    // min={
-                    //   travelDate === today
-                    //     ? currentTime
-                    //     : undefined
-                    // }
-                    value={travelTime}
+                    value={travelTime || ""}
                     onChange={(e) => setTravelTime(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none transition focus:border-black"
+                    className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
@@ -187,52 +146,64 @@ const SearchRides = () => {
               {/* Seats */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Seats
+                  Seats Needed
                 </label>
-
                 <div className="relative">
                   <Users
                     size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
-
                   <input
                     type="number"
                     min="1"
+                    max="8"
                     value={seatRequired}
                     onChange={(e) => setSeatRequired(Number(e.target.value))}
-                    className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none transition focus:border-black"
+                    className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Error */}
+            {/* Error Message */}
             {error && (
-              <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div className="mt-4 rounded-xl bg-red-50 p-3.5 text-xs font-medium text-red-600 border border-red-100">
                 {error}
               </div>
             )}
 
-            {/* Search Button */}
+            {/* Submit Button */}
             <div className="mt-6 flex justify-end">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 rounded-lg bg-black px-6 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex items-center gap-2 rounded-xl bg-black px-7 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-gray-800 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Search size={18} />
-
-                {loading ? "Searching..." : "Search Rides"}
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Searching...</span>
+                  </>
+                ) : (
+                  <>
+                    <Search size={18} />
+                    <span>Search Rides</span>
+                  </>
+                )}
               </button>
             </div>
           </form>
         </div>
 
-        {/* Search Results */}
+        {/* Results Container */}
         <div className="mt-8">
-          {!loading && (
-            <RideSearchList rides={rides} seatRequired={seatRequired} />
+          {loading ? (
+            <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm flex flex-col items-center">
+              <Loader2 size={36} className="animate-spin text-black mb-3" />
+              <p className="text-gray-600 font-medium text-sm">Searching for matching rides...</p>
+            </div>
+          ) : (
+            searched && <RideSearchList rides={rides} seatRequired={seatRequired} />
           )}
         </div>
       </div>

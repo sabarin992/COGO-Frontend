@@ -77,9 +77,12 @@ export const requestRide = async (requestData) => {
 
 // Get all requests for a ride
 export const getRideRequests = async (rideId) => {
+  
+  
   const response = await api.get(
-    `/ride/${rideId}/requests`
+    `/ride/${rideId}/requests/`
   );
+  console.log('hello');
 
   return response.data;
 };
