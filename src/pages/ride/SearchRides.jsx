@@ -3,6 +3,7 @@ import { Search, MapPin, Calendar, Clock, Users } from "lucide-react";
 
 import { searchRides } from "../../services/rideService";
 import RideSearchList from "../../components/ride/RideSearchList";
+import SearchBox from "../../components/common/SearchBox";
 
 const SearchRides = () => {
   const [source, setSource] = useState("");
@@ -73,26 +74,31 @@ const SearchRides = () => {
       seat_required: seatRequired,
     };
 
-    try {
-      setLoading(true);
+    console.log(searchData);
+    
 
-      const data = await searchRides(searchData);
+    return;
 
-      setRides(data);
-    } catch (error) {
-        console.log(error.response);
+    // try {
+    //   setLoading(true);
+
+    //   const data = await searchRides(searchData);
+
+    //   setRides(data);
+    // } catch (error) {
+    //     console.log(error.response);
         
-      console.error("Failed to search rides:", error);
+    //   console.error("Failed to search rides:", error);
 
-      setRides([]);
+    //   setRides([]);
 
-      setError(
-        error?.response?.data?.detail ||
-          "Unable to search rides. Please try again.",
-      );
-    } finally {
-      setLoading(false);
-    }
+    //   setError(
+    //     error?.response?.data?.detail ||
+    //       "Unable to search rides. Please try again.",
+    //   );
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -112,48 +118,23 @@ const SearchRides = () => {
           <form onSubmit={handleSearch}>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-5">
               {/* Source */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  From
-                </label>
-
-                <div className="relative">
-                  <MapPin
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-
-                  <input
-                    type="text"
-                    value={source}
-                    onChange={(e) => setSource(e.target.value)}
-                    placeholder="Enter source"
-                    className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none transition focus:border-black"
-                  />
-                </div>
-              </div>
+              <SearchBox
+                label="From"
+                name="source"
+                value={source}
+                onChange={(val) => setSource(val)}
+                placeholder="Enter source"
+              />
 
               {/* Destination */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  To
-                </label>
+              <SearchBox
+                label="To"
+                name="destination"
+                value={destination}
+                onChange={(val) => setDestination(val)}
+                placeholder="Enter destination"
+              />
 
-                <div className="relative">
-                  <MapPin
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-
-                  <input
-                    type="text"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="Enter destination"
-                    className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none transition focus:border-black"
-                  />
-                </div>
-              </div>
 
               {/* Date */}
               <div>

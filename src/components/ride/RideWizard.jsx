@@ -34,6 +34,9 @@ const RideWizard = () => {
     <ReviewRideStep />,
   ];
 
+  console.log(rideData);
+  
+
   const validateCurrentStep = () => {
     // Step 0 - Ride details
     if (currentStep === 0) {
