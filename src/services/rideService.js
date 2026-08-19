@@ -88,6 +88,18 @@ export const getRideRequests = async (rideId) => {
 };
 
 
+// Get all requests across ALL rides posted by the logged-in user
+export const getAllMyRideRequests = async () => {
+  const response = await api.get("/ride/my-requests");
+  return response.data;
+};
+
+// Get details for a specific ride request by ID
+export const getSingleRideRequestDetails = async (rideRequestId) => {
+  const response = await api.get(`/ride/requests/${rideRequestId}`);
+  return response.data;
+};
+
 // Accept a ride request
 export const acceptRideRequest = async (rideRequestId) => {
   const response = await api.post(
@@ -105,4 +117,5 @@ export const rejectRideRequest = async (rideRequestId) => {
 
   return response.data;
 };
+
 

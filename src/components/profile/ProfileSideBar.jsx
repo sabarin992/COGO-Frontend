@@ -7,6 +7,8 @@ import {
   User,
   ShieldCheck,
   Car,
+  Navigation,
+  Users,
   Lock,
   Wallet,
   CreditCard,
@@ -41,6 +43,18 @@ const ProfileSideBar = () => {
     if (path === "/profile/vehicles") {
       return location.pathname.startsWith("/profile/vehicles");
     }
+    if (path === "/profile/my-rides") {
+      return (
+        location.pathname.startsWith("/profile/my-rides") ||
+        location.pathname.startsWith("/ride/my-rides")
+      );
+    }
+    if (path === "/profile/ride-requests") {
+      return (
+        location.pathname.startsWith("/profile/ride-requests") ||
+        location.pathname.includes("/requests")
+      );
+    }
     return location.pathname === path;
   };
 
@@ -49,20 +63,33 @@ const ProfileSideBar = () => {
       name: "Account Overview",
       icon: User,
       path: "/profile",
-      enable:true
+      enable: true,
     },
     {
       name: "KYC Documents",
       icon: ShieldCheck,
       path: "/profile/kyc",
-      enable:true
+      enable: true,
     },
     {
       name: "Vehicles",
       icon: Car,
       path: "/profile/vehicles",
-      enable:true
+      enable: true,
     },
+    {
+      name: "My Rides",
+      icon: Navigation,
+      path: "/profile/my-rides",
+      enable: true,
+    },
+    {
+      name: "Ride Requests",
+      icon: Users,
+      path: "/profile/ride-requests",
+      enable: true,
+    },
+
     {
       name: "Password Management",
       icon: Lock,

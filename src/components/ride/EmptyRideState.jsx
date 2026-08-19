@@ -1,30 +1,29 @@
 import React from "react";
-import { CarFront } from "lucide-react";
+import { Car, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const EmptyRideState = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center py-24">
-      <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-        <CarFront className="w-12 h-12 text-gray-400" />
+    <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm flex flex-col items-center max-w-xl mx-auto my-8">
+      <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
+        <Car size={32} />
       </div>
 
-      <h2 className="text-3xl font-bold text-gray-900">
-        No Rides Found
-      </h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-1">No Posted Rides Found</h2>
 
-      <p className="mt-3 text-gray-500 text-center max-w-md">
-        You haven't posted any rides yet.
-        Create your first ride and start sharing your journey.
+      <p className="text-sm text-gray-500 max-w-sm mb-6">
+        You haven't posted any rides yet. Create your first ride offer and start sharing your journey with passengers.
       </p>
 
       <button
+        type="button"
         onClick={() => navigate("/ride/post-ride")}
-        className="mt-8 bg-black text-white px-8 py-3 rounded-xl hover:bg-gray-800 transition"
+        className="flex items-center gap-2 rounded-xl bg-black px-7 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95"
       >
-        Post Your First Ride
+        <Plus size={18} />
+        <span>Post Your First Ride</span>
       </button>
     </div>
   );

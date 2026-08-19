@@ -25,10 +25,6 @@ const RideRoutes = [
         element: <PostRide />,
       },
       {
-        path: "my-rides",
-        element: <MyRides />,
-      },
-      {
         path: "my-rides/:rideId",
         element:<RideDetails mode="my-ride" />
       },

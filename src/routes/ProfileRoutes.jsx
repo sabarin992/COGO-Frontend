@@ -7,6 +7,9 @@ import ProfileLayout from "../layouts/ProfileLayout";
 import Edit_profile from "../pages/profile/Edit_profile";
 import KycDocuments from "../pages/kyc/KYCDocuments";
 import AddKycDoc from "../pages/kyc/AddKycDoc";
+import MyRides from "../pages/ride/MyRides";
+import RideRequests from "../pages/ride/RideRequests";
+import RideRequestDetails from "../pages/ride/RideRequestDetails";
 
 const ProfileRoutes = [
   {
@@ -32,6 +35,18 @@ const ProfileRoutes = [
       {
         path: "add-kyc",
         element: <AddKycDoc />,
+      },
+      {
+        path: "my-rides",
+        element: <MyRides />,
+      },
+      {
+        path: "ride-requests",
+        element: <RideRequests />,
+      },
+      {
+        path: "ride-requests/:requestId",
+        element: <RideRequestDetails />,
       },
     ],
   },
