@@ -1,9 +1,24 @@
 import React from "react";
 import { Car, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { getUserProfile } from "../../services/userService";
 
 const EmptyRideState = () => {
   const navigate = useNavigate();
+
+  const handlePostRideClick = async () => {
+    try {
+      const data = await getUserProfile();
+      if (data && data.role === "rider") {
+        navigate("/ride/post-ride");
+      } else {
+        toast.error("Only users with the Rider role can post a ride.");
+      }
+    } catch (err) {
+      toast.error("Only users with the Rider role can post a ride.");
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm flex flex-col items-center max-w-xl mx-auto my-8">
@@ -19,7 +34,7 @@ const EmptyRideState = () => {
 
       <button
         type="button"
-        onClick={() => navigate("/ride/post-ride")}
+        onClick={handlePostRideClick}
         className="flex items-center gap-2 rounded-xl bg-black px-7 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95"
       >
         <Plus size={18} />

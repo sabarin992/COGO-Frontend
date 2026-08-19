@@ -8,12 +8,27 @@ import ConfirmationModal from "../../components/modals/ConfirmationModal";
 import { toast } from "react-toastify";
 import { Plus, Car } from "lucide-react";
 
+import { getUserProfile } from "../../services/userService";
+
 const MyRides = () => {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRide, setSelectedRide] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const navigate = useNavigate();
+
+  const handlePostRideClick = async () => {
+    try {
+      const data = await getUserProfile();
+      if (data && data.role === "rider") {
+        navigate("/ride/post-ride");
+      } else {
+        toast.error("Only users with the Rider role can post a ride.");
+      }
+    } catch (err) {
+      toast.error("Only users with the Rider role can post a ride.");
+    }
+  };
 
   useEffect(() => {
     const fetchMyRides = async () => {
@@ -101,7 +116,7 @@ const MyRides = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/ride/post-ride")}
+            onClick={handlePostRideClick}
             className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-gray-800 transition shrink-0"
           >
             <Plus size={16} />

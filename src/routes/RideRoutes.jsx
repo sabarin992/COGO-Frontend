@@ -1,4 +1,5 @@
 import PostRide from "../pages/ride/PostRide";
+import RiderProtectedRoute from "../components/RiderProtectedRoute";
 import RideSuccess from "../pages/ride/RideSuccess";
 import RideFailure from "../pages/ride/RideFailure";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -22,7 +23,11 @@ const RideRoutes = [
     children: [
       {
         path: "post-ride",
-        element: <PostRide />,
+        element: (
+          <RiderProtectedRoute>
+            <PostRide />
+          </RiderProtectedRoute>
+        ),
       },
       {
         path: "my-rides/:rideId",

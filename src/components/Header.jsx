@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { User } from "lucide-react";
 
+import { getUserProfile } from "../services/userService";
+
 const Header = () => {
   const [open, setOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
@@ -13,6 +15,18 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handlePostRideClick = async () => {
+    try {
+      const data = await getUserProfile();
+      if (data && data.role === "rider") {
+        navigate("/ride/post-ride");
+      } else {
+        toast.error("Only users with the Rider role can post a ride.");
+      }
+    } catch (err) {
+      toast.error("Only users with the Rider role can post a ride.");
+    }
+  };
 
   // Check whether the current route matches the given path
   const isActive = (path) => location.pathname === path;
@@ -57,7 +71,7 @@ const Header = () => {
             </a>
 
             <a
-              onClick={() => navigate("/ride/post-ride")}
+              onClick={handlePostRideClick}
               className={`font-semibold cursor-pointer pb-1 ${
                 isActive("/ride/post-ride")
                   ? "text-black border-b-2 border-black"
@@ -66,6 +80,7 @@ const Header = () => {
             >
               Post a Ride
             </a>
+
 
             <a
               onClick={() => navigate("/ride/my-rides")}
