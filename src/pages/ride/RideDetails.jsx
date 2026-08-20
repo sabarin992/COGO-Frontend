@@ -323,7 +323,7 @@ const RideDetails = ({ mode }) => {
               onClick={handleNext}
               className="flex items-center gap-2 rounded-xl bg-black px-7 py-3 text-sm font-medium text-white transition hover:bg-gray-800 shadow-sm"
             >
-              <span>Next</span>
+              <span>Book</span>
               <ArrowRight size={18} />
             </button>
           </div>

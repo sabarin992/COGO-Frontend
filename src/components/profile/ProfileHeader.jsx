@@ -28,7 +28,7 @@ const ProfileHeader = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           
           {/* Left Logo */}
-          <div className="text-3xl font-black tracking-tight text-black">
+          <div className="text-3xl font-black tracking-tight text-black cursor-pointer" onClick={()=>{navigate("/")}}>
             COGO
           </div>
 

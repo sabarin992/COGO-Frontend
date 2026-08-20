@@ -118,4 +118,19 @@ export const rejectRideRequest = async (rideRequestId) => {
   return response.data;
 };
 
+// Get all ride requests sent by the logged-in user as a passenger (My Bookings)
+export const getMyBookings = async () => {
+  const response = await api.get("/ride/my-bookings");
+  return response.data;
+};
+
+// Cancel a ride request (passenger booking)
+export const cancelRideRequest = async (rideRequestId) => {
+  const response = await api.post(
+    `/ride/requests/${rideRequestId}/cancel`
+  );
+  return response.data;
+};
+
+
 

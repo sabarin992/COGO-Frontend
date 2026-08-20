@@ -55,7 +55,7 @@ const RideDetailsStep = () => {
             onChange={handleSourceChange}
             onSelect={handleSourceSelect}
             placeholder="Enter starting location..."
-            required
+            // required
           />
         </div>
 
@@ -68,14 +68,14 @@ const RideDetailsStep = () => {
             onChange={handleDestinationChange}
             onSelect={handleDestinationSelect}
             placeholder="Enter destination location..."
-            required
+            // required
           />
         </div>
 
         {/* Available Seats Selector */}
         <div className="pt-2">
           <label className="block mb-2 font-medium text-gray-700">
-            Available Seats <span className="text-red-500">*</span>
+            Available Seats 
           </label>
 
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">

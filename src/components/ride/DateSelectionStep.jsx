@@ -98,9 +98,6 @@ const DateSelectionStep = () => {
       {/* Selected Summary Card */}
       {rideData.travel_date && (
         <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200/80 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-            <Sparkles size={16} />
-          </div>
           <div>
             <p className="text-xs text-gray-500">Selected Date</p>
             <p className="font-semibold text-gray-900 text-sm">

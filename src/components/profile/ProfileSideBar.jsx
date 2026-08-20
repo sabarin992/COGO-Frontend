@@ -9,6 +9,7 @@ import {
   Car,
   Navigation,
   Users,
+  BookmarkCheck,
   Lock,
   Wallet,
   CreditCard,
@@ -52,7 +53,13 @@ const ProfileSideBar = () => {
     if (path === "/profile/ride-requests") {
       return (
         location.pathname.startsWith("/profile/ride-requests") ||
-        location.pathname.includes("/requests")
+        location.pathname.includes("/ride-requests")
+      );
+    }
+    if (path === "/profile/my-bookings") {
+      return (
+        location.pathname.startsWith("/profile/my-bookings") ||
+        location.pathname.includes("/my-bookings")
       );
     }
     return location.pathname === path;
@@ -87,6 +94,12 @@ const ProfileSideBar = () => {
       name: "Ride Requests",
       icon: Users,
       path: "/profile/ride-requests",
+      enable: true,
+    },
+    {
+      name: "My Bookings",
+      icon: BookmarkCheck,
+      path: "/profile/my-bookings",
       enable: true,
     },
 

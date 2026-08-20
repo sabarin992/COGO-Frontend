@@ -197,7 +197,7 @@ const AddKycDoc = () => {
         >
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-3">
-              Document Type <span className="text-red-500">*</span>
+              Document Type 
             </label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-3">
               {docTypes.map((item) => {
@@ -245,7 +245,7 @@ const AddKycDoc = () => {
               htmlFor="docNum"
               className="block text-sm font-semibold text-gray-900 mb-2"
             >
-              Document ID / Number <span className="text-red-500">*</span>
+              Document ID / Number 
             </label>
             <input
               id="docNum"
@@ -267,7 +267,7 @@ const AddKycDoc = () => {
 
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-3">
-              Upload Document Images <span className="text-red-500">*</span>
+              Upload Document Images 
             </label>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -350,7 +350,7 @@ const AddKycDoc = () => {
 
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-gray-700 mb-2">
-                  Back Side (Optional)
+                  Back Side
                 </span>
                 {backDoc ? (
                   <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 aspect-[16/10] group">
