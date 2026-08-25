@@ -16,6 +16,27 @@ import {
 } from "lucide-react";
 import { getRideDetails } from "../../services/rideService";
 
+const getStatusBadgeStyle = (status) => {
+  switch (status?.toUpperCase()) {
+    case "CREATED":
+      return "bg-slate-100 text-slate-700 border-slate-200";
+    case "UPCOMING":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    case "STARTED":
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    case "REACHED_PICKUP":
+      return "bg-purple-50 text-purple-700 border-purple-200";
+    case "ONGOING":
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    case "COMPLETED":
+      return "bg-teal-50 text-teal-700 border-teal-200";
+    case "CANCELLED":
+      return "bg-rose-50 text-rose-700 border-rose-200";
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-200";
+  }
+};
+
 const RideDetails = ({ mode }) => {
   const { rideId } = useParams();
   const navigate = useNavigate();
@@ -29,6 +50,7 @@ const RideDetails = ({ mode }) => {
   const [error, setError] = useState("");
 
   const isSearchMode = mode === "search";
+  const isMyRideMode = mode === "my-ride";
 
   useEffect(() => {
     const fetchRideDetails = async () => {
@@ -109,7 +131,7 @@ const RideDetails = ({ mode }) => {
           <p className="text-red-600 font-semibold mb-4">{error}</p>
           <button
             type="button"
-            onClick={() => navigate("/ride/search")}
+            onClick={() => (isMyRideMode ? navigate("/profile/my-rides") : navigate("/ride/search"))}
             className="rounded-xl bg-black px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 transition"
           >
             Go Back
@@ -127,19 +149,35 @@ const RideDetails = ({ mode }) => {
         {/* Back Navigation */}
         <button
           type="button"
-          onClick={() => navigate("/ride/search")}
+          onClick={() => (isMyRideMode ? navigate("/profile/my-rides") : navigate("/ride/search"))}
           className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
         >
           <ArrowLeft size={18} />
-          <span>Back to Search Results</span>
+          <span>{isMyRideMode ? "Back to My Posted Rides" : "Back to Search Results"}</span>
         </button>
 
         {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-extrabold text-gray-900">Ride Details</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Review complete route, vehicle, and driver details before requesting your ride.
-          </p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-extrabold text-gray-900">Ride Details</h1>
+              {ride.status && (
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${getStatusBadgeStyle(
+                    ride.status
+                  )}`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-current"></span>
+                  {ride.status.replace("_", " ")}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-sm text-gray-600">
+              {isMyRideMode
+                ? "Manage and review complete details, route, vehicle, and joined passengers for your posted ride."
+                : "Review complete route, vehicle, and driver details before requesting your ride."}
+            </p>
+          </div>
         </div>
 
         {/* Journey Route Card */}
