@@ -82,7 +82,7 @@ const Header = () => {
             </a>
 
 
-            <a
+            {/* <a
               onClick={() => navigate("/ride/my-rides")}
               className={`font-semibold cursor-pointer pb-1 ${
                 isActive("/ride/my-rides")
@@ -91,7 +91,7 @@ const Header = () => {
               }`}
             >
               My Rides
-            </a>
+            </a> */}
           </nav>
 
           {/* Right Hamburger / Actions (Only render Hamburger options if user is logged in) */}
@@ -169,9 +169,9 @@ const Header = () => {
                 Post a Ride
               </a>
 
-              <a href="#" className="text-gray-600 hover:text-black transition">
+              {/* <a href="#" className="text-gray-600 hover:text-black transition">
                 My Rides
-              </a>
+              </a> */}
 
               <button
                 onClick={handleLogout}

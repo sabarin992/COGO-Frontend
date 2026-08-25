@@ -7,6 +7,7 @@ import VehicleSelectionStep from "./VehicleSelectionStep";
 import ReviewRideStep from "./ReviewRideStep";
 import ProgressIndicator from "./ProgressIndicator";
 import StepNavigation from "./StepNavigation";
+import ConfirmationModal from "../modals/ConfirmationModal";
 import { useRide } from "../../context/RideContext";
 import { createRide } from "../../services/rideService";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ const RideWizard = () => {
   const navigate = useNavigate();
   const { rideData, resetRideData } = useRide();
   const [publishing, setPublishing] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const steps = [
     <RideDetailsStep key="details" />,
@@ -86,12 +88,16 @@ const RideWizard = () => {
     try {
       setPublishing(true);
 
+      const year = rideData.travel_date.getFullYear();
+      const month = String(rideData.travel_date.getMonth() + 1).padStart(2, "0");
+      const day = String(rideData.travel_date.getDate()).padStart(2, "0");
+
       const payload = {
         source: rideData.source,
         destination: rideData.destination,
         route: rideData.route,
 
-        travel_date: rideData.travel_date.toISOString().split("T")[0],
+        travel_date: `${year}-${month}-${day}`,
 
         travel_time: rideData.travel_time.toLocaleTimeString("en-GB", {
           hour: "2-digit",
@@ -133,11 +139,16 @@ const RideWizard = () => {
     if (!validateCurrentStep()) return;
 
     if (currentStep === steps.length - 1) {
-      await publishRide();
+      setShowConfirmModal(true);
       return;
     }
 
     setCurrentStep((prev) => prev + 1);
+  };
+
+  const handleConfirmPublish = async () => {
+    setShowConfirmModal(false);
+    await publishRide();
   };
 
   // Previous button handler
@@ -175,6 +186,18 @@ const RideWizard = () => {
           nextStep={nextStep}
           previousStep={previousStep}
           loading={publishing}
+        />
+
+        {/* Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirmPublish}
+          title="Confirm Ride Offer?"
+          message={`Are you sure you want to publish this ride offer from ${rideData.source} to ${rideData.destination}? Passengers will be able to search and request seats on this ride.`}
+          confirmText={publishing ? "Publishing..." : "Yes, Publish Ride"}
+          cancelText="Review Details"
+          type="primary"
         />
       </div>
     </div>

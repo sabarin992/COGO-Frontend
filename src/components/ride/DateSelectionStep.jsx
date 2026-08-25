@@ -6,9 +6,16 @@ import { Calendar, Sparkles } from "lucide-react";
 const DateSelectionStep = () => {
   const { rideData, updateRideData } = useRide();
 
+  const normalizeDate = (d) => {
+    if (!d) return null;
+    const normalized = new Date(d);
+    normalized.setHours(12, 0, 0, 0);
+    return normalized;
+  };
+
   const handleDateChange = (date) => {
     updateRideData({
-      travel_date: date,
+      travel_date: normalizeDate(date),
     });
   };
 
@@ -16,7 +23,7 @@ const DateSelectionStep = () => {
   const getPresetDate = (daysFromNow) => {
     const d = new Date();
     d.setDate(d.getDate() + daysFromNow);
-    return d;
+    return normalizeDate(d);
   };
 
   const presets = [

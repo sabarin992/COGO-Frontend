@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { requestRide } from "../../services/rideService";
 import { toast } from "react-toastify";
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
 
 const RideReview = () => {
   const { rideId } = useParams();
@@ -24,6 +25,7 @@ const RideReview = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const handleBack = () => {
     navigate(`/ride/${rideId}/details`, {
@@ -61,6 +63,11 @@ const RideReview = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConfirmRequest = async () => {
+    setShowConfirmModal(false);
+    await handleRequestRide();
   };
 
   if (!ride) {
@@ -271,9 +278,9 @@ const RideReview = () => {
 
           <button
             type="button"
-            onClick={handleRequestRide}
+            onClick={() => setShowConfirmModal(true)}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-black px-7 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center justify-center gap-2 rounded-xl bg-black px-7 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <>
@@ -288,6 +295,18 @@ const RideReview = () => {
             )}
           </button>
         </div>
+
+        {/* Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirmRequest}
+          title="Confirm Ride Request?"
+          message={`Are you sure you want to request ${seatRequired} ${seatRequired === 1 ? "seat" : "seats"} for the ride from ${ride.source} to ${ride.destination}? A booking request will be sent to driver ${ride.driver?.full_name || "the host"}.`}
+          confirmText={loading ? "Requesting..." : "Yes, Send Request"}
+          cancelText="Cancel"
+          type="primary"
+        />
       </div>
     </div>
   );

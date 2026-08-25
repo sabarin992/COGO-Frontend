@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   Navigation,
   Loader2,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { getRideDetails } from "../../services/rideService";
 
@@ -19,7 +21,9 @@ const RideDetails = ({ mode }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const seatRequired = location.state?.seatRequired || 1;
+  const initialSeats = location.state?.seatRequired || 1;
+  const [selectedSeats, setSelectedSeats] = useState(initialSeats);
+
   const [ride, setRide] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,6 +37,11 @@ const RideDetails = ({ mode }) => {
         setError("");
         const data = await getRideDetails(rideId);
         setRide(data);
+
+        // Adjust selectedSeats if initial value exceeds available seats
+        if (data && data.available_seats) {
+          setSelectedSeats((prev) => Math.min(Math.max(1, prev), data.available_seats));
+        }
       } catch (err) {
         console.error("Failed to fetch ride details:", err);
         setError(
@@ -45,6 +54,16 @@ const RideDetails = ({ mode }) => {
 
     fetchRideDetails();
   }, [rideId]);
+
+  const handleDecrementSeats = () => {
+    setSelectedSeats((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleIncrementSeats = () => {
+    if (!ride) return;
+    const maxAvailable = ride.available_seats || 1;
+    setSelectedSeats((prev) => Math.min(maxAvailable, prev + 1));
+  };
 
   const formatDate = (date) => {
     return new Date(`${date}T00:00:00`).toLocaleDateString("en-IN", {
@@ -66,7 +85,7 @@ const RideDetails = ({ mode }) => {
   const handleNext = () => {
     navigate(`/ride/${rideId}/review`, {
       state: {
-        seatRequired,
+        seatRequired: selectedSeats,
         ride,
       },
     });
@@ -90,7 +109,7 @@ const RideDetails = ({ mode }) => {
           <p className="text-red-600 font-semibold mb-4">{error}</p>
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/ride/search")}
             className="rounded-xl bg-black px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 transition"
           >
             Go Back
@@ -108,7 +127,7 @@ const RideDetails = ({ mode }) => {
         {/* Back Navigation */}
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/ride/search")}
           className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
         >
           <ArrowLeft size={18} />
@@ -306,26 +325,57 @@ const RideDetails = ({ mode }) => {
           </div>
         )}
 
-        {/* Selected seats + Next */}
+        {/* Selected seats counter + Book Button */}
         {isSearchMode && (
           <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Your Request
+                Seats Required
               </p>
-              <p className="mt-1 text-lg font-semibold text-gray-900">
-                {seatRequired} {seatRequired === 1 ? "seat" : "seats"}
+              <p className="text-xs text-gray-400 mt-0.5 font-medium">
+                Max available: {ride.available_seats} {ride.available_seats === 1 ? "seat" : "seats"}
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex items-center gap-2 rounded-xl bg-black px-7 py-3 text-sm font-medium text-white transition hover:bg-gray-800 shadow-sm"
-            >
-              <span>Book</span>
-              <ArrowRight size={18} />
-            </button>
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+              {/* Interactive Counter Controls */}
+              <div className="flex items-center gap-2 rounded-xl bg-gray-100 p-1.5 border border-gray-200">
+                <button
+                  type="button"
+                  disabled={selectedSeats <= 1}
+                  onClick={handleDecrementSeats}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-white font-bold text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  title="Decrease seats"
+                >
+                  <Minus size={16} />
+                </button>
+
+                <span className="w-8 text-center text-sm font-bold text-gray-900">
+                  {selectedSeats}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={selectedSeats >= (ride.available_seats || 1)}
+                  onClick={handleIncrementSeats}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-white font-bold text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  title="Increase seats"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+
+              {/* Book Action Button */}
+              <button
+                type="button"
+                disabled={ride.available_seats <= 0}
+                onClick={handleNext}
+                className="flex items-center gap-2 rounded-xl bg-black px-7 py-3 text-sm font-medium text-white transition hover:bg-gray-800 shadow-sm disabled:opacity-50 cursor-pointer shrink-0"
+              >
+                <span>Book ({selectedSeats} {selectedSeats === 1 ? "Seat" : "Seats"})</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
           </div>
         )}
       </div>

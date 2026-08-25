@@ -3,7 +3,7 @@ import { getVehicles } from "../../services/vehicleService";
 import VehicleCard from "../vehicle/VehicleCard";
 import EmptyVehicleState from "../vehicle/EmptyVehicleState";
 import { useRide } from "../../context/RideContext";
-import { Car, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const VehicleSelectionStep = () => {
   const { rideData, updateRideData } = useRide();
@@ -65,11 +65,7 @@ const VehicleSelectionStep = () => {
                   vehicle: vehicle,
                 })
               }
-              className={`cursor-pointer rounded-2xl border p-5 transition-all duration-200 ${
-                isSelected
-                  ? "border-black bg-gray-900 text-white shadow-lg scale-[1.01]"
-                  : "border-gray-200 bg-white hover:border-gray-400 text-gray-900"
-              }`}
+              className="cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
             >
               <VehicleCard
                 vehicle={vehicle}

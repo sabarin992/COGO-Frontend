@@ -38,7 +38,7 @@ const RideSuccess = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/ride/my-rides")}
+            onClick={() => navigate("/profile/my-rides")}
             className="mt-6 rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
           >
             View My Rides
@@ -217,7 +217,7 @@ const RideSuccess = () => {
           {/* My Rides */}
           <button
             type="button"
-            onClick={() => navigate("/ride/my-rides")}
+            onClick={() => navigate("/profile/my-rides")}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-black px-6 py-3 font-medium text-white transition hover:bg-gray-800"
           >
             View My Rides
