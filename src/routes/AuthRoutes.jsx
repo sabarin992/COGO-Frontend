@@ -6,6 +6,7 @@ import OtpVerification from "../pages/auth/OtpVerification";
 import ResetPassword from "../pages/auth/ResetPassword";
 import PublicRoute from "../components/PublicRoute";
 import UserLayout from "../layouts/UserLayout";
+import MyComponent from "../components/map/TesMap";
 
 const AuthRoutes = [
   {
@@ -14,9 +15,9 @@ const AuthRoutes = [
       {
         path: "/login",
         element: (
-          <PublicRoute>
+          // <PublicRoute>
             <Login />
-          </PublicRoute>
+          // </PublicRoute>
         ),
       },
       {
@@ -49,6 +50,12 @@ const AuthRoutes = [
           <PublicRoute>
             <ResetPassword />
           </PublicRoute>
+        ),
+      },
+      {
+        path: "/map",
+        element: (
+          <MyComponent/>
         ),
       },
     ],

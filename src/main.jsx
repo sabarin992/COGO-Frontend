@@ -11,7 +11,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
     <BrowserRouter>
       <GoogleOAuthProvider clientId={`${import.meta.env.VITE_GOOGLE_CLIENT_ID}`}>
         <AuthProvider>
@@ -19,6 +19,6 @@ createRoot(document.getElementById("root")).render(
         </AuthProvider>
       </GoogleOAuthProvider>
     </BrowserRouter>
-  </StrictMode>
+  // {/* </StrictMode> */}
 );
 

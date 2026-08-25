@@ -7,6 +7,9 @@ import {
   User,
   ShieldCheck,
   Car,
+  Navigation,
+  Users,
+  BookmarkCheck,
   Lock,
   Wallet,
   CreditCard,
@@ -41,6 +44,24 @@ const ProfileSideBar = () => {
     if (path === "/profile/vehicles") {
       return location.pathname.startsWith("/profile/vehicles");
     }
+    if (path === "/profile/my-rides") {
+      return (
+        location.pathname.startsWith("/profile/my-rides") ||
+        location.pathname.startsWith("/ride/my-rides")
+      );
+    }
+    if (path === "/profile/ride-requests") {
+      return (
+        location.pathname.startsWith("/profile/ride-requests") ||
+        location.pathname.includes("/ride-requests")
+      );
+    }
+    if (path === "/profile/my-bookings") {
+      return (
+        location.pathname.startsWith("/profile/my-bookings") ||
+        location.pathname.includes("/my-bookings")
+      );
+    }
     return location.pathname === path;
   };
 
@@ -49,20 +70,39 @@ const ProfileSideBar = () => {
       name: "Account Overview",
       icon: User,
       path: "/profile",
-      enable:true
+      enable: true,
     },
     {
       name: "KYC Documents",
       icon: ShieldCheck,
       path: "/profile/kyc",
-      enable:true
+      enable: true,
     },
     {
       name: "Vehicles",
       icon: Car,
       path: "/profile/vehicles",
-      enable:true
+      enable: true,
     },
+    {
+      name: "My Rides",
+      icon: Navigation,
+      path: "/profile/my-rides",
+      enable: true,
+    },
+    {
+      name: "Ride Requests",
+      icon: Users,
+      path: "/profile/ride-requests",
+      enable: true,
+    },
+    {
+      name: "My Bookings",
+      icon: BookmarkCheck,
+      path: "/profile/my-bookings",
+      enable: true,
+    },
+
     {
       name: "Password Management",
       icon: Lock,

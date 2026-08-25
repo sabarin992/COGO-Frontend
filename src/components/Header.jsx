@@ -1,16 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { logout } from "../services/authService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { User } from "lucide-react";
+
+import { getUserProfile } from "../services/userService";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
-  const { isAuthenticated: isLoggedIn, setIsAuthenticated: setIsLoggedIn } = useAuth();
+  const { isAuthenticated: isLoggedIn, setIsAuthenticated: setIsLoggedIn } =
+    useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  const handlePostRideClick = async () => {
+    try {
+      const data = await getUserProfile();
+      if (data && data.role === "rider") {
+        navigate("/ride/post-ride");
+      } else {
+        toast.error("Only users with the Rider role can post a ride.");
+      }
+    } catch (err) {
+      toast.error("Only users with the Rider role can post a ride.");
+    }
+  };
+
+  // Check whether the current route matches the given path
+  const isActive = (path) => location.pathname === path;
+
+  // logout function
   const handleLogout = async () => {
     try {
       const data = await logout();
@@ -26,55 +47,51 @@ const Header = () => {
     <>
       <header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          
           {/* Left Logo */}
-          <div className="text-3xl font-black tracking-tight text-black cursor-pointer"
-          onClick={()=>{navigate("/")}}>
+          <div
+            className="text-3xl font-black tracking-tight text-black cursor-pointer"
+            onClick={() => {
+              navigate("/");
+            }}
+          >
             COGO
           </div>
 
           {/* Center Menu */}
           <nav className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
             <a
-              href="#"
-              className="text-black font-semibold border-b-2 border-black pb-1"
+              onClick={() => navigate("/ride/search")}
+              className={`font-semibold cursor-pointer pb-1 ${
+                isActive("/ride/search")
+                  ? "text-black border-b-2 border-black"
+                  : "text-gray-600 hover:text-black"
+              }`}
             >
               Find a Ride
             </a>
 
             <a
-        
-              className="text-gray-600 hover:text-black transition duration-200 font-semibold cursor-pointer"
-              onClick={()=>{
-                navigate("/ride/post-ride")
-              }}
+              onClick={handlePostRideClick}
+              className={`font-semibold cursor-pointer pb-1 ${
+                isActive("/ride/post-ride")
+                  ? "text-black border-b-2 border-black"
+                  : "text-gray-600 hover:text-black"
+              }`}
             >
               Post a Ride
             </a>
 
-            <a
-              href="#"
-              className="text-gray-600 hover:text-black transition duration-200 font-semibold"
+
+            {/* <a
+              onClick={() => navigate("/ride/my-rides")}
+              className={`font-semibold cursor-pointer pb-1 ${
+                isActive("/ride/my-rides")
+                  ? "text-black border-b-2 border-black"
+                  : "text-gray-600 hover:text-black"
+              }`}
             >
               My Rides
-            </a>
-
-            {/* Render Logout link ONLY if user is authenticated */}
-            {/* {isLoggedIn ? (
-              <a
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-black transition duration-200 font-semibold cursor-pointer"
-              >
-                Logout
-              </a>
-            ) : (
-              <a
-                onClick={() => navigate("/login")}
-                className="text-gray-600 hover:text-black transition duration-200 font-semibold cursor-pointer"
-              >
-                Login
-              </a>
-            )} */}
+            </a> */}
           </nav>
 
           {/* Right Hamburger / Actions (Only render Hamburger options if user is logged in) */}
@@ -101,9 +118,11 @@ const Header = () => {
               </button> */}
               <div className="hidden md:flex items-center gap-6">
                 {/* Profile Icon */}
-                <button 
-                onClick={()=>{navigate("/profile")}}
-                className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
+                <button
+                  onClick={() => {
+                    navigate("/profile");
+                  }}
+                  className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
                 >
                   <User size={18} />
                 </button>
@@ -141,13 +160,18 @@ const Header = () => {
                 Find a Ride
               </a>
 
-              <a className="text-gray-600 hover:text-black transition" onClick={()=>{navigate("/post-ride")}}>
+              <a
+                className="text-gray-600 hover:text-black transition"
+                onClick={() => {
+                  navigate("/post-ride");
+                }}
+              >
                 Post a Ride
               </a>
 
-              <a href="#" className="text-gray-600 hover:text-black transition">
+              {/* <a href="#" className="text-gray-600 hover:text-black transition">
                 My Rides
-              </a>
+              </a> */}
 
               <button
                 onClick={handleLogout}
@@ -171,7 +195,6 @@ const Header = () => {
 
           {/* Drawer Panel content */}
           <aside className="fixed top-0 right-0 h-screen w-80 bg-white shadow-2xl z-[100] flex flex-col p-6 animate-in slide-in-from-right duration-300 ease-in-out">
-            
             {/* Header / Cross Button */}
             <div className="flex justify-between items-center pb-6 border-b border-gray-100">
               <span className="text-2xl font-black tracking-tight text-black">

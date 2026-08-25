@@ -1,26 +1,20 @@
 import { useEffect, useState } from "react";
-
 import { getVehicles } from "../../services/vehicleService";
-
 import VehicleCard from "../vehicle/VehicleCard";
-
 import EmptyVehicleState from "../vehicle/EmptyVehicleState";
-
 import { useRide } from "../../context/RideContext";
+import { Loader2 } from "lucide-react";
 
 const VehicleSelectionStep = () => {
   const { rideData, updateRideData } = useRide();
-
   const [vehicles, setVehicles] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const vehicles = await getVehicles();
-
-        setVehicles(vehicles);
+        const data = await getVehicles();
+        setVehicles(data);
       } catch (error) {
         console.error("Failed to fetch vehicles:", error);
       } finally {
@@ -33,43 +27,60 @@ const VehicleSelectionStep = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-80">
-        <p className="text-lg font-medium text-gray-500">
-          Loading your vehicles...
-        </p>
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-12 flex flex-col items-center justify-center min-h-[360px]">
+        <Loader2 size={36} className="animate-spin text-black mb-3" />
+        <p className="text-gray-600 font-medium text-sm">Loading your registered vehicles...</p>
       </div>
     );
   }
 
   if (vehicles.length === 0) {
-    return <EmptyVehicleState />;
+    return (
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <EmptyVehicleState />
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+      {/* Header */}
       <div className="mb-8">
-        <h2 className="text-3xl font-bold">Select Your Vehicle</h2>
-
-        <p className="text-gray-500 mt-2">
-          Choose the vehicle you want to use for this ride.
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Select Your Vehicle</h2>
+        <p className="text-gray-500 text-sm md:text-base">
+          Choose which of your registered vehicles you will be driving for this ride.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {vehicles.map((vehicle) => (
-          <VehicleCard
-            key={vehicle.id}
-            vehicle={vehicle}
-            selectable
-            selected={rideData.vehicle_id === vehicle.id}
-            onSelect={(vehicle) => {
-              updateRideData({
-                vehicle_id: vehicle.id,
-                vehicle:vehicle
-              });
-            }}
-          />
-        ))}
+      {/* Vehicles Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {vehicles.map((vehicle) => {
+          const isSelected = rideData.vehicle_id === vehicle.id;
+          return (
+            <div
+              key={vehicle.id}
+              onClick={() =>
+                updateRideData({
+                  vehicle_id: vehicle.id,
+                  vehicle: vehicle,
+                })
+              }
+              className="cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
+            >
+              <VehicleCard
+                vehicle={vehicle}
+                selectable
+                selected={isSelected}
+                onSelect={(v) =>
+                  updateRideData({
+                    vehicle_id: v.id,
+                    vehicle: v,
+                  })
+                }
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

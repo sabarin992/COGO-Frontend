@@ -1,11 +1,10 @@
 import React from "react";
-import { Pencil, Trash2, CheckCircle } from "lucide-react";
+import { Pencil, Trash2, CheckCircle, Car } from "lucide-react";
 
 const VehicleCard = ({
   vehicle,
   onEdit,
   onDelete,
-
   selectable = false,
   selected = false,
   onSelect,
@@ -16,15 +15,19 @@ const VehicleCard = ({
       ? vehicle.images[0]
       : "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800&auto=format&fit=crop";
 
+  const yearDisplay = vehicle?.year || vehicle?.manufacture_year || "-";
+  const colorDisplay = vehicle?.color || "-";
+  const plateDisplay = vehicle?.registration_number || vehicle?.license_plate || vehicle?.plate_number || "-";
+
   return (
     <div
       className={`
         bg-white rounded-3xl overflow-hidden
         transition-all duration-300
-        border-2
+        border-2 flex flex-col justify-between h-full
         ${
           selected
-            ? "border-black shadow-xl"
+            ? "border-black shadow-xl ring-2 ring-black/10"
             : "border-gray-100 shadow-sm hover:shadow-md"
         }
       `}
@@ -33,13 +36,13 @@ const VehicleCard = ({
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-gray-100">
         <img
           src={mainImage}
-          alt={`${vehicle.brand} ${vehicle.model}`}
-          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          alt={`${vehicle?.brand || "Vehicle"} ${vehicle?.model || ""}`}
+          className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
         />
 
         {/* Active Badge */}
         <div className="absolute top-4 left-4">
-          <span className="bg-black text-white text-xs font-semibold px-4 py-1.5 rounded-full">
+          <span className="bg-black/90 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full shadow-sm">
             Active
           </span>
         </div>
@@ -48,15 +51,25 @@ const VehicleCard = ({
         {!selectable && (
           <div className="absolute top-4 right-4 flex gap-2">
             <button
-              onClick={() => onEdit?.(vehicle)}
-              className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:bg-gray-100"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(vehicle);
+              }}
+              className="w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition"
+              title="Edit Vehicle"
             >
-              <Pencil className="w-4 h-4" />
+              <Pencil className="w-4 h-4 text-gray-800" />
             </button>
 
             <button
-              onClick={() => onDelete?.(vehicle)}
-              className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:bg-red-50"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(vehicle);
+              }}
+              className="w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-red-50 transition"
+              title="Delete Vehicle"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
             </button>
@@ -65,55 +78,79 @@ const VehicleCard = ({
 
         {/* Selected Badge */}
         {selectable && selected && (
-          <div className="absolute top-4 right-4">
-            <CheckCircle className="w-8 h-8 text-green-500 fill-white" />
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow flex items-center gap-1.5 border border-emerald-200">
+            <CheckCircle className="w-4 h-4 text-emerald-600 fill-emerald-100" />
+            <span className="text-xs font-bold text-emerald-800">Selected</span>
           </div>
         )}
       </div>
 
       {/* Vehicle Information */}
-      <div className="p-6">
-        <h3 className="text-2xl font-bold text-gray-900">
-          {vehicle.brand} {vehicle.model}
-        </h3>
-
-        <div className="border-b border-gray-100 my-4" />
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <p className="text-xs uppercase text-gray-400 font-semibold">
-              Year
-            </p>
-            <p className="font-bold">{vehicle.year}</p>
+      <div className="p-6 flex flex-col justify-between flex-1">
+        <div>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                {vehicle?.brand} {vehicle?.model}
+              </h3>
+              {vehicle?.vehicle_type && (
+                <span className="inline-block text-xs font-semibold text-gray-500 mt-0.5">
+                  {vehicle.vehicle_type} {vehicle?.seating_capacity ? `· ${vehicle.seating_capacity} Seats` : ""}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div>
-            <p className="text-xs uppercase text-gray-400 font-semibold">
-              Color
-            </p>
-            <p className="font-bold">{vehicle.color}</p>
-          </div>
+          <div className="border-b border-gray-100 my-4" />
 
-          <div>
-            <p className="text-xs uppercase text-gray-400 font-semibold">
-              Plate
-            </p>
-            <p className="font-bold truncate">
-              {vehicle.registration_number}
-            </p>
+          {/* 3-Column Vehicle Details */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+              <p className="text-[10px] uppercase text-gray-400 font-extrabold tracking-wider">
+                Year
+              </p>
+              <p className="font-bold text-gray-900 text-sm mt-0.5">
+                {yearDisplay}
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+              <p className="text-[10px] uppercase text-gray-400 font-extrabold tracking-wider">
+                Color
+              </p>
+              <p className="font-bold text-gray-900 text-sm capitalize mt-0.5">
+                {colorDisplay}
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 min-w-0">
+              <p className="text-[10px] uppercase text-gray-400 font-extrabold tracking-wider">
+                Plate
+              </p>
+              <p
+                className="font-bold text-gray-900 text-sm truncate mt-0.5"
+                title={plateDisplay}
+              >
+                {plateDisplay}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Select Button */}
         {selectable && (
           <button
-            onClick={() => onSelect?.(vehicle)}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect?.(vehicle);
+            }}
             className={`
-              mt-6 w-full py-3 rounded-xl font-semibold transition-all
+              mt-5 w-full py-3 rounded-xl font-bold text-sm transition-all cursor-pointer shadow-sm
 
               ${
                 selected
-                  ? "bg-black text-white"
+                  ? "bg-black text-white hover:bg-gray-800"
                   : "bg-gray-100 hover:bg-gray-200 text-gray-900"
               }
             `}
@@ -127,102 +164,3 @@ const VehicleCard = ({
 };
 
 export default VehicleCard;
-
-
-
-
-
-// import React from "react";
-// import { Pencil, Trash2 } from "lucide-react";
-
-// const VehicleCard = ({ vehicle, onEdit, onDelete }) => {
-//   // Get main image or fallback placeholder
-//   const mainImage =
-//     Array.isArray(vehicle?.images) && vehicle.images.length > 0
-//       ? vehicle.images[0]
-//       : "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800&auto=format&fit=crop";
-
-//   return (
-//     <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100/80 flex flex-col group">
-//       {/* Top Image Banner */}
-//       <div className="relative aspect-[16/10] w-full overflow-hidden bg-gray-100">
-//         <img
-//           src={mainImage}
-//           alt={`${vehicle.brand} ${vehicle.model}`}
-//           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-//         />
-
-//         {/* Floating Active Badge */}
-//         <div className="absolute top-4 left-4 z-10">
-//           <span className="bg-black/95 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-sm tracking-wide">
-//             Active
-//           </span>
-//         </div>
-
-//         {/* Floating Action Buttons (Edit & Delete) */}
-//         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-//           <button
-//             onClick={() => onEdit && onEdit(vehicle)}
-//             title="Edit Vehicle"
-//             className="w-10 h-10 bg-white hover:bg-gray-100 text-gray-900 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105 active:scale-95"
-//           >
-//             <Pencil className="w-4 h-4 text-gray-800" />
-//           </button>
-
-//           <button
-//             onClick={() => onDelete && onDelete(vehicle)}
-//             title="Delete Vehicle"
-//             className="w-10 h-10 bg-white hover:bg-red-50 text-red-500 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105 active:scale-95"
-//           >
-//             <Trash2 className="w-4 h-4 text-red-500" />
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Bottom Info Section */}
-//       <div className="p-6 flex flex-col justify-between flex-1">
-//         <div>
-//           {/* Vehicle Name (Brand + Model) */}
-//           <h3 className="text-2xl font-bold text-gray-900 tracking-tight">
-//             {vehicle.brand} {vehicle.model}
-//           </h3>
-
-//           {/* Subtle Horizontal Separator */}
-//           <div className="border-b border-gray-100 my-4" />
-
-//           {/* 3-Column Stats Metadata */}
-//           <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-1">
-//             <div>
-//               <span className="block text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
-//                 YEAR
-//               </span>
-//               <span className="block text-sm sm:text-base font-bold text-gray-900 truncate">
-//                 {vehicle.year}
-//               </span>
-//             </div>
-
-//             <div>
-//               <span className="block text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
-//                 COLOR
-//               </span>
-//               <span className="block text-sm sm:text-base font-bold text-gray-900 truncate">
-//                 {vehicle.color}
-//               </span>
-//             </div>
-
-//             <div>
-//               <span className="block text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
-//                 LICENSE PLATE
-//               </span>
-//               <span className="block text-sm sm:text-base font-bold text-gray-900 truncate">
-//                 {vehicle.registration_number}
-//               </span>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default VehicleCard;

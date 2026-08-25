@@ -20,6 +20,7 @@ const Edit_profile = () => {
   // Validation Rules
   const validateFullName = (value) => {
     let error = "";
+    value = value.trim()
     const nameRegex = /^[A-Za-z\s]+$/;
     if (!value) error = "Full Name is required";
     else if (value.length < 3) error = "Minimum 3 characters required";
