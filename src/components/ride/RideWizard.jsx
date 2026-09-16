@@ -22,10 +22,10 @@ const RideWizard = () => {
 
   const steps = [
     <RideDetailsStep key="details" />,
+    <VehicleSelectionStep key="vehicle" />,
     <RouteSelectionStep key="route" />,
     <DateSelectionStep key="date" />,
     <TimeSelectionStep key="time" />,
-    <VehicleSelectionStep key="vehicle" />,
     <ReviewRideStep key="review" />,
   ];
 
@@ -48,34 +48,34 @@ const RideWizard = () => {
       }
     }
 
-    // Step 1 - Route
+    // Step 1 - Vehicle
     if (currentStep === 1) {
+      if (!rideData.vehicle_id) {
+        toast.error("Please select a vehicle.");
+        return false;
+      }
+    }
+
+    // Step 2 - Route
+    if (currentStep === 2) {
       if (!rideData.route) {
         toast.error("Please select a route.");
         return false;
       }
     }
 
-    // Step 2 - Date
-    if (currentStep === 2) {
+    // Step 3 - Date
+    if (currentStep === 3) {
       if (!rideData.travel_date) {
         toast.error("Please select travel date.");
         return false;
       }
     }
 
-    // Step 3 - Time
-    if (currentStep === 3) {
+    // Step 4 - Time
+    if (currentStep === 4) {
       if (!rideData.travel_time) {
         toast.error("Please select departure time.");
-        return false;
-      }
-    }
-
-    // Step 4 - Vehicle
-    if (currentStep === 4) {
-      if (!rideData.vehicle_id) {
-        toast.error("Please select a vehicle.");
         return false;
       }
     }
