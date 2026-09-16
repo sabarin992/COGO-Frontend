@@ -37,7 +37,7 @@ const EditVehicle = () => {
       try {
         setPageLoading(true);
         const response = await getVehicleById(vehicleId);
-        const data = response?.data;
+        const data = response;
 
         if (data) {
           setVehicleData({
