@@ -132,5 +132,30 @@ export const cancelRideRequest = async (rideRequestId) => {
   return response.data;
 };
 
+// Start a ride (UPCOMING -> STARTED)
+export const startRide = async (rideId) => {
+  const response = await api.post(`/ride/${rideId}/start`);
+  return response.data;
+};
+
+// Mark ride as reached pickup point (STARTED -> REACHED_PICKUP)
+export const reachedPickup = async (rideId) => {
+  const response = await api.post(`/ride/${rideId}/reached-pickup`);
+  return response.data;
+};
+
+// Pick up a specific passenger (accepted -> picked_up)
+export const pickupPassenger = async (rideId, rideRequestId) => {
+  const response = await api.post(`/ride/${rideId}/requests/${rideRequestId}/pickup`);
+  return response.data;
+};
+
+// Complete a ride (ONGOING -> COMPLETED)
+export const completeRide = async (rideId) => {
+  const response = await api.post(`/ride/${rideId}/complete`);
+  return response.data;
+};
+
+
 
 
