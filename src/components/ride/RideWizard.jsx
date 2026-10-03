@@ -96,6 +96,7 @@ const RideWizard = () => {
         source: rideData.source,
         destination: rideData.destination,
         route: rideData.route,
+        route_geometry: rideData.route_geometry,
 
         travel_date: `${year}-${month}-${day}`,
 
@@ -110,6 +111,8 @@ const RideWizard = () => {
 
         vehicle_id: rideData.vehicle_id,
       };
+
+      console.log("Ride payload:", payload);
 
       const response = await createRide(payload);
 

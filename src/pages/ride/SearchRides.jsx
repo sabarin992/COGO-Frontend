@@ -4,6 +4,8 @@ import { searchRides } from "../../services/rideService";
 import RideSearchList from "../../components/ride/RideSearchList";
 import SearchBox from "../../components/common/SearchBox";
 
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+
 const SearchRides = () => {
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
@@ -40,34 +42,94 @@ const SearchRides = () => {
       return;
     }
 
+    // Get passenger source coordinates
+    const sourceCoords = await geocodeLocation(source.trim());
+
+    // Get passenger destination coordinates
+    const destinationCoords = await geocodeLocation(destination.trim());
+
+    console.log("Passenger source:", source.trim());
+
+    console.log("Passenger source coordinates:", sourceCoords);
+
+    console.log("Passenger destination:", destination.trim());
+
+    console.log("Passenger destination coordinates:", destinationCoords);
+
+    // Make sure both locations were found
+    if (!sourceCoords) {
+      setError("Unable to find the starting location.");
+      return;
+    }
+
+    if (!destinationCoords) {
+      setError("Unable to find the destination location.");
+      return;
+    }
+
+    // Search payload
     const searchData = {
       source: source.trim(),
       destination: destination.trim(),
+
+      source_coords: sourceCoords,
+      destination_coords: destinationCoords,
+
       travel_date: travelDate,
       travel_time: travelTime,
       seat_required: seatRequired,
     };
 
+    console.log("========== SEARCH DATA ==========");
+    console.log(searchData);
+    console.log("=================================");
+
     try {
       setLoading(true);
       setSearched(true);
+
       const data = await searchRides(searchData);
+
       setRides(data || []);
     } catch (err) {
       if (err?.response?.status === 404) {
         setRides([]);
       } else {
         console.error("Failed to search rides:", err);
+
         setRides([]);
+
         setError(
           err?.response?.data?.detail ||
             err?.response?.data?.message ||
-            "Unable to search rides. Please try again."
+            "Unable to search rides. Please try again.",
         );
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const geocodeLocation = async (query) => {
+    if (!query || !MAPBOX_TOKEN) return null;
+
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          query,
+        )}.json?access_token=${MAPBOX_TOKEN}&limit=1`,
+      );
+
+      const data = await res.json();
+
+      if (data.features && data.features.length > 0) {
+        return data.features[0].geometry.coordinates;
+      }
+    } catch (error) {
+      console.error("Geocoding failed:", error);
+    }
+
+    return null;
   };
 
   return (
@@ -79,7 +141,8 @@ const SearchRides = () => {
             Find Your Ride
           </h1>
           <p className="mt-2 text-sm sm:text-base text-gray-600">
-            Search for available rides matching your journey, schedule, and seat requirements.
+            Search for available rides matching your journey, schedule, and seat
+            requirements.
           </p>
         </div>
 
@@ -200,10 +263,14 @@ const SearchRides = () => {
           {loading ? (
             <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm flex flex-col items-center">
               <Loader2 size={36} className="animate-spin text-black mb-3" />
-              <p className="text-gray-600 font-medium text-sm">Searching for matching rides...</p>
+              <p className="text-gray-600 font-medium text-sm">
+                Searching for matching rides...
+              </p>
             </div>
           ) : (
-            searched && <RideSearchList rides={rides} seatRequired={seatRequired} />
+            searched && (
+              <RideSearchList rides={rides} seatRequired={seatRequired} />
+            )
           )}
         </div>
       </div>
