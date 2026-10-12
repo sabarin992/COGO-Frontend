@@ -18,6 +18,8 @@ import {
 } from "../../services/rideService";
 import ConfirmationModal from "../../components/modals/ConfirmationModal";
 import { toast } from "react-toastify";
+import useLocationWebSocket from "../../hooks/useLocationWebSocket";
+import LiveTrackingMap from "../../components/map/LiveTrackingMap";
 
 const MyBookingDetails = () => {
   const { requestId } = useParams();
@@ -29,6 +31,22 @@ const MyBookingDetails = () => {
 
   const [processing, setProcessing] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // Active ride statuses for which the passenger can receive location updates.
+  // booking.status must be "accepted" or "picked_up" (confirmed by the backend).
+  const ACTIVE_TRACKING_STATUSES = ["STARTED", "REACHED_PICKUP", "ONGOING"];
+  const isPassengerTrackingActive =
+    booking !== null &&
+    ACTIVE_TRACKING_STATUSES.includes(booking.ride_status) &&
+    (booking.status === "accepted" || booking.status === "picked_up");
+
+  // Connect as a passenger — receive driver location updates.
+  // The WebSocket URL uses ride_id (not ride_request_id).
+  const { driverLocation, wsError: locationWsError } = useLocationWebSocket({
+    rideId: booking?.ride_id ?? null,
+    role: "passenger",
+    enabled: isPassengerTrackingActive,
+  });
 
   const fetchDetails = async () => {
     try {
@@ -250,6 +268,21 @@ const MyBookingDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Live Driver Location — shown when tracking is active for this passenger */}
+      {isPassengerTrackingActive && (
+        <div>
+          <LiveTrackingMap
+            driverLocation={driverLocation}
+            label="Driver\'s Live Location"
+          />
+          {locationWsError && (
+            <p className="mt-2 text-center text-xs text-amber-700">
+              {locationWsError}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Driver Information Card */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

@@ -26,6 +26,8 @@ import {
   pickupPassenger,
 } from "../../services/rideService";
 import { toast } from "react-toastify";
+import useLocationWebSocket from "../../hooks/useLocationWebSocket";
+import LiveTrackingMap from "../../components/map/LiveTrackingMap";
 
 const getStatusBadgeStyle = (status) => {
   switch (status?.toUpperCase()) {
@@ -65,6 +67,47 @@ const RideDetails = ({ mode }) => {
 
   const isSearchMode = mode === "search";
   const isMyRideMode = mode === "my-ride";
+
+  // Statuses during which live location tracking is active.
+  const ACTIVE_TRACKING_STATUSES = ["STARTED", "REACHED_PICKUP", "ONGOING"];
+  const isTrackingActive =
+    isMyRideMode && ride && ACTIVE_TRACKING_STATUSES.includes(ride.status);
+
+  // Driver location broadcasting — only runs when tracking is active.
+  const { status: wsStatus, geoError, wsError } = useLocationWebSocket({
+    rideId: ride?.ride_id ?? null,
+    role: "driver",
+    enabled: isTrackingActive,
+  });
+
+  // Track the driver's own GPS coordinates so the map can centre on them.
+  const [driverOwnLocation, setDriverOwnLocation] = React.useState(null);
+
+  useEffect(() => {
+    if (!isTrackingActive) {
+      setDriverOwnLocation(null);
+      return;
+    }
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) =>
+        setDriverOwnLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {}, // errors handled by useLocationWebSocket
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [isTrackingActive]);
+
+  // Notify the driver when geolocation is unavailable.
+  const prevGeoError = React.useRef(null);
+  useEffect(() => {
+    if (geoError && geoError !== prevGeoError.current) {
+      toast.error(geoError);
+      prevGeoError.current = geoError;
+    }
+  }, [geoError]);
 
   useEffect(() => {
     const fetchRideDetails = async () => {
@@ -471,6 +514,30 @@ const RideDetails = ({ mode }) => {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* WebSocket error banner — shown only when tracking is or was active */}
+            {wsError && (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                <strong>Location:</strong> {wsError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Live Location Map — driver view (my-ride mode, active statuses) */}
+        {isTrackingActive && (
+          <div className="mb-6">
+            <LiveTrackingMap
+              driverLocation={driverOwnLocation}
+              label={`Your Live Location · ${wsStatus === "open" ? "Sharing" : "Connecting…"}`}
+            />
+            {wsStatus !== "open" && (
+              <p className="mt-2 text-center text-xs text-gray-400">
+                {wsStatus === "connecting"
+                  ? "Connecting to location service…"
+                  : "Location sharing paused."}
+              </p>
             )}
           </div>
         )}
