@@ -50,34 +50,53 @@ const VehicleSelectionStep = () => {
         <p className="text-gray-500 text-sm md:text-base">
           Choose which of your registered vehicles you will be driving for this ride.
         </p>
+        <p className="text-xs text-gray-400 mt-1">
+          Vehicles must have at least <span className="font-semibold text-gray-600">{rideData.available_seats} seat{rideData.available_seats > 1 ? "s" : ""}</span> available for this ride.
+        </p>
       </div>
 
       {/* Vehicles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {vehicles.map((vehicle) => {
           const isSelected = rideData.vehicle_id === vehicle.id;
+          const isDisabled = (vehicle.seating_capacity ?? 0) < rideData.available_seats;
+
           return (
             <div
               key={vehicle.id}
-              onClick={() =>
-                updateRideData({
-                  vehicle_id: vehicle.id,
-                  vehicle: vehicle,
-                })
-              }
-              className="cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
-            >
-              <VehicleCard
-                vehicle={vehicle}
-                selectable
-                selected={isSelected}
-                onSelect={(v) =>
+              onClick={() => {
+                if (!isDisabled) {
                   updateRideData({
-                    vehicle_id: v.id,
-                    vehicle: v,
-                  })
+                    vehicle_id: vehicle.id,
+                    vehicle: vehicle,
+                  });
                 }
-              />
+              }}
+              className={`transition-transform duration-200 ${isDisabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:scale-[1.01]"}`}
+            >
+              <div className="relative">
+                {isDisabled && (
+                  <div className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-2 bg-amber-50 border-t border-amber-200 px-4 py-2.5 rounded-b-3xl">
+                    <span className="text-amber-500 text-base">⚠️</span>
+                    <p className="text-xs text-amber-700 font-medium">
+                      Not enough seats — this vehicle only has {vehicle.seating_capacity} seat{vehicle.seating_capacity !== 1 ? "s" : ""}, but you need {rideData.available_seats}.
+                    </p>
+                  </div>
+                )}
+                <VehicleCard
+                  vehicle={vehicle}
+                  selectable
+                  selected={isSelected}
+                  onSelect={(v) => {
+                    if (!isDisabled) {
+                      updateRideData({
+                        vehicle_id: v.id,
+                        vehicle: v,
+                      });
+                    }
+                  }}
+                />
+              </div>
             </div>
           );
         })}

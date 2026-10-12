@@ -10,19 +10,23 @@ export default function RouteSelectionStep() {
   const { rideData, updateRideData } = useRide();
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [startCoords, setStartCoords] = useState(rideData.source_coords || null);
-  const [endCoords, setEndCoords] = useState(rideData.destination_coords || null);
+  const [startCoords, setStartCoords] = useState(
+    rideData.source_coords || null,
+  );
+  const [endCoords, setEndCoords] = useState(
+    rideData.destination_coords || null,
+  );
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
 
-  // Geocode address if coords are not already in context
+  // Get the coordinates [longitude, latitude] for a given place name
   const geocodeLocation = useCallback(async (query) => {
     if (!query || !MAPBOX_TOKEN) return null;
     try {
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&limit=1`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&limit=1`,
       );
       const data = await res.json();
       if (data.features && data.features.length > 0) {
@@ -34,12 +38,71 @@ export default function RouteSelectionStep() {
     return null;
   }, []);
 
+  // for finding the nearest rider-route coordinate
+  const findClosestRoutePoint = (point, routeCoordinates) => {
+    let closestPoint = null;
+    let closestDistance = Infinity;
+    let closestIndex = -1;
+
+    routeCoordinates.forEach((routePoint, index) => {
+      const distance = calculateDistance(point, routePoint);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestPoint = routePoint;
+        closestIndex = index;
+      }
+    });
+
+    return {
+      closestPoint,
+      closestDistance,
+      closestIndex,
+    };
+  };
+
+  // for calculate distance
+
+  const calculateDistance = (point1, point2) => {
+    const [lng1, lat1] = point1;
+    const [lng2, lat2] = point2;
+
+    const R = 6371000;
+
+    const lat1Rad = (lat1 * Math.PI) / 180;
+    const lat2Rad = (lat2 * Math.PI) / 180;
+
+    const deltaLat = ((lat2 - lat1) * Math.PI) / 180;
+
+    const deltaLng = ((lng2 - lng1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(deltaLat / 2) ** 2 +
+      Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(deltaLng / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  };
+
+  
   // Fetch routes from Mapbox Directions API
   const fetchRoutes = useCallback(async () => {
     setLoading(true);
 
     let srcCoords = rideData.source_coords || startCoords;
     let dstCoords = rideData.destination_coords || endCoords;
+    const ROUTE_THRESHOLD = 1000;
+
+    // passenger_source
+    const passenger_source = await geocodeLocation("Vyttila, Kerala, India");
+    console.log("Passenger source:", passenger_source);
+
+    // passenger_destination
+    const passenger_destination = await geocodeLocation(
+      "Palarivattam, Kerala, India",
+    );
+    console.log("Passenger destination:", passenger_destination);
 
     if (!srcCoords && rideData.source) {
       srcCoords = await geocodeLocation(rideData.source);
@@ -58,12 +121,15 @@ export default function RouteSelectionStep() {
         const data = await res.json();
 
         if (data.routes && data.routes.length > 0) {
+          console.log(data.routes.length);
+          
           const formattedRoutes = data.routes.map((r, index) => {
             const distKm = (r.distance / 1000).toFixed(1);
             const durationMins = Math.round(r.duration / 60);
             const hrs = Math.floor(durationMins / 60);
             const mins = durationMins % 60;
-            const durationStr = hrs > 0 ? `${hrs} hr ${mins} min` : `${mins} min`;
+            const durationStr =
+              hrs > 0 ? `${hrs} hr ${mins} min` : `${mins} min`;
             const name = r.legs?.[0]?.summary
               ? `Via ${r.legs[0].summary}`
               : `Route ${index + 1}`;
@@ -76,6 +142,86 @@ export default function RouteSelectionStep() {
               geometry: r.geometry,
             };
           });
+
+          formattedRoutes.forEach((route) => {
+            const routeCoordinates = route.geometry.coordinates;
+
+            console.log("================================");
+
+            console.log("Checking rider route:", route.name);
+
+            console.log("Route coordinate count:", routeCoordinates.length);
+
+            // Passenger source → Vyttila
+            const sourceResult = findClosestRoutePoint(
+              passenger_source,
+              routeCoordinates,
+            );
+
+            // Passenger destination → Palarivattam
+            const destinationResult = findClosestRoutePoint(
+              passenger_destination,
+              routeCoordinates,
+            );
+
+            console.log("Passenger source:", passenger_source);
+
+            console.log(
+              "Closest route point to passenger source:",
+              sourceResult.closestPoint,
+            );
+
+            console.log(
+              "Source distance:",
+              sourceResult.closestDistance.toFixed(2),
+              "meters",
+            );
+
+            console.log("Source route index:", sourceResult.closestIndex);
+
+            console.log("Passenger destination:", passenger_destination);
+
+            console.log(
+              "Closest route point to passenger destination:",
+              destinationResult.closestPoint,
+            );
+
+            console.log(
+              "Destination distance:",
+              destinationResult.closestDistance.toFixed(2),
+              "meters",
+            );
+
+            console.log(
+              "Destination route index:",
+              destinationResult.closestIndex,
+            );
+
+            // Check whether the distance between the passenger's source and the closest point on the rider's route is less than or equal to ROUTE_THRESHOLD.
+            const sourceNearRoute = sourceResult?.closestDistance <= ROUTE_THRESHOLD;
+
+              // Check whether the distance between the passenger's destination and the closest point on the rider's route is less than or equal to ROUTE_THRESHOLD
+          const destinationNearRoute =
+            destinationResult?.closestDistance <= ROUTE_THRESHOLD;
+
+            // check its order of passenger source and destination
+          const correctOrder =
+            sourceResult.closestIndex < destinationResult.closestIndex;
+
+            // check if it is in intermediate route
+          const isIntermediateRoute =
+            sourceNearRoute && destinationNearRoute && correctOrder;
+
+          console.log("Source near route:", sourceNearRoute);
+
+          console.log("Destination near route:", destinationNearRoute);
+
+          console.log("Correct direction:", correctOrder);
+
+          console.log("Intermediate route:", isIntermediateRoute);
+          });
+
+          
 
           setRoutes(formattedRoutes);
           if (!rideData.route && formattedRoutes.length > 0) {
@@ -91,16 +237,41 @@ export default function RouteSelectionStep() {
 
     // Fallback dummy routes if API unavailable or locations missing
     const fallbackRoutes = [
-      { id: 1, name: "Via Main Highway (NH544)", distance: "74 km", duration: "1 hr 20 min" },
-      { id: 2, name: "Via Coastal Route (NH66)", distance: "78 km", duration: "1 hr 35 min" },
-      { id: 3, name: "Via State Highway (SH22)", distance: "82 km", duration: "1 hr 40 min" },
+      {
+        id: 1,
+        name: "Via Main Highway (NH544)",
+        distance: "74 km",
+        duration: "1 hr 20 min",
+      },
+      {
+        id: 2,
+        name: "Via Coastal Route (NH66)",
+        distance: "78 km",
+        duration: "1 hr 35 min",
+      },
+      {
+        id: 3,
+        name: "Via State Highway (SH22)",
+        distance: "82 km",
+        duration: "1 hr 40 min",
+      },
     ];
     setRoutes(fallbackRoutes);
     if (!rideData.route) {
       updateRideData({ route: fallbackRoutes[0].name });
     }
     setLoading(false);
-  }, [rideData.source, rideData.destination, rideData.source_coords, rideData.destination_coords, geocodeLocation, updateRideData, rideData.route, startCoords, endCoords]);
+  }, [
+    rideData.source,
+    rideData.destination,
+    rideData.source_coords,
+    rideData.destination_coords,
+    geocodeLocation,
+    updateRideData,
+    rideData.route,
+    startCoords,
+    endCoords,
+  ]);
 
   useEffect(() => {
     fetchRoutes();
@@ -134,12 +305,17 @@ export default function RouteSelectionStep() {
       // Add Start Marker
       if (startCoords) {
         const el = document.createElement("div");
-        el.className = "flex items-center justify-center w-8 h-8 rounded-full bg-emerald-600 text-white font-bold shadow-lg border-2 border-white text-xs";
+        el.className =
+          "flex items-center justify-center w-8 h-8 rounded-full bg-emerald-600 text-white font-bold shadow-lg border-2 border-white text-xs";
         el.innerText = "A";
 
         const marker = new mapboxgl.Marker(el)
           .setLngLat(startCoords)
-          .setPopup(new mapboxgl.Popup({ offset: 25 }).setText(`Source: ${rideData.source || "Start"}`))
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setText(
+              `Source: ${rideData.source || "Start"}`,
+            ),
+          )
           .addTo(map);
 
         markersRef.current.push(marker);
@@ -149,12 +325,17 @@ export default function RouteSelectionStep() {
       // Add End Marker
       if (endCoords) {
         const el = document.createElement("div");
-        el.className = "flex items-center justify-center w-8 h-8 rounded-full bg-red-600 text-white font-bold shadow-lg border-2 border-white text-xs";
+        el.className =
+          "flex items-center justify-center w-8 h-8 rounded-full bg-red-600 text-white font-bold shadow-lg border-2 border-white text-xs";
         el.innerText = "B";
 
         const marker = new mapboxgl.Marker(el)
           .setLngLat(endCoords)
-          .setPopup(new mapboxgl.Popup({ offset: 25 }).setText(`Destination: ${rideData.destination || "End"}`))
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setText(
+              `Destination: ${rideData.destination || "End"}`,
+            ),
+          )
           .addTo(map);
 
         markersRef.current.push(marker);
@@ -194,9 +375,17 @@ export default function RouteSelectionStep() {
 
           // Update paint properties dynamically
           if (map.getLayer(layerId)) {
-            map.setPaintProperty(layerId, "line-color", isSelected ? "#2563eb" : "#9ca3af");
+            map.setPaintProperty(
+              layerId,
+              "line-color",
+              isSelected ? "#2563eb" : "#9ca3af",
+            );
             map.setPaintProperty(layerId, "line-width", isSelected ? 6 : 4);
-            map.setPaintProperty(layerId, "line-opacity", isSelected ? 0.95 : 0.45);
+            map.setPaintProperty(
+              layerId,
+              "line-opacity",
+              isSelected ? 0.95 : 0.45,
+            );
           }
 
           // Extend bounds to include route coordinates
@@ -217,19 +406,29 @@ export default function RouteSelectionStep() {
     } else {
       map.on("load", renderMapElements);
     }
+  }, [
+    routes,
+    rideData.route,
+    startCoords,
+    endCoords,
+    rideData.source,
+    rideData.destination,
+  ]);
 
-  }, [routes, rideData.route, startCoords, endCoords, rideData.source, rideData.destination]);
-
+  // for select the route from routes
   const handleSelectRoute = (route) => {
-    updateRideData({
-      route: route.name,
-    });
-  };
+  updateRideData({
+    route: route.name,
+    route_geometry: route.geometry.coordinates,
+  });
+};
 
   return (
     <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Choose Your Route</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Choose Your Route
+        </h2>
         <p className="text-gray-500">
           Select your preferred route for this journey.
         </p>
@@ -250,7 +449,6 @@ export default function RouteSelectionStep() {
 
       {/* Two-Column Responsive Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
         {/* Left Side: Route Options */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -259,7 +457,8 @@ export default function RouteSelectionStep() {
             </h3>
             {loading && (
               <span className="flex items-center gap-1.5 text-xs text-blue-600 font-medium">
-                <RefreshCw size={12} className="animate-spin" /> Fetching routes...
+                <RefreshCw size={12} className="animate-spin" /> Fetching
+                routes...
               </span>
             )}
           </div>
@@ -267,7 +466,10 @@ export default function RouteSelectionStep() {
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-xl" />
+                <div
+                  key={i}
+                  className="h-24 bg-gray-100 animate-pulse rounded-xl"
+                />
               ))}
             </div>
           ) : (
@@ -297,7 +499,9 @@ export default function RouteSelectionStep() {
                           )}
                         </div>
 
-                        <div className={`flex items-center gap-4 text-xs ${isSelected ? "text-gray-300" : "text-gray-500"}`}>
+                        <div
+                          className={`flex items-center gap-4 text-xs ${isSelected ? "text-gray-300" : "text-gray-500"}`}
+                        >
                           <span className="flex items-center gap-1">
                             <Navigation size={13} /> {route.distance}
                           </span>
@@ -307,10 +511,16 @@ export default function RouteSelectionStep() {
                         </div>
                       </div>
 
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                        isSelected ? "border-white bg-white text-black" : "border-gray-300 group-hover:border-gray-500"
-                      }`}>
-                        {isSelected && <Check size={12} className="stroke-[3]" />}
+                      <div
+                        className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
+                          isSelected
+                            ? "border-white bg-white text-black"
+                            : "border-gray-300 group-hover:border-gray-500"
+                        }`}
+                      >
+                        {isSelected && (
+                          <Check size={12} className="stroke-[3]" />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -324,7 +534,7 @@ export default function RouteSelectionStep() {
         <div className="lg:col-span-7">
           <div className="w-full h-[420px] lg:h-[480px] rounded-xl overflow-hidden shadow-inner border border-gray-200 relative bg-gray-100">
             <div ref={mapContainerRef} className="w-full h-full" />
-            
+
             {/* Map Overlay Badge */}
             <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm text-xs font-medium text-gray-700 border border-gray-200/60 flex items-center gap-2">
               <Compass size={14} className="text-blue-600" />
@@ -332,7 +542,6 @@ export default function RouteSelectionStep() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

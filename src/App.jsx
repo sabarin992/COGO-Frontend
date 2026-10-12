@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import "react-toastify/dist/ReactToastify.css";
 import VehicleRoutes from "./routes/VehicleRoutes";
 import RideRoutes from "./routes/RideRoutes";
+import ChatRoutes from "./routes/ChatRoutes";
 
 function App() {
   const routes = useRoutes([
@@ -19,6 +20,7 @@ function App() {
     ...ProfileRoutes,
     ...VehicleRoutes,
     ...RideRoutes,
+    ...ChatRoutes,
     {
       path: "*",
       element: <NotFound />,

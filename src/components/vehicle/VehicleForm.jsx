@@ -6,8 +6,34 @@ import {
   ShieldCheck,
   Loader2,
 } from "lucide-react";
+import React from "react";
+import Select from "react-select";
 
 import VehicleImageUpload from "./VehicleImageUpload";
+import { useCarData } from "../../hooks/useCarData";
+
+const customStyles = {
+  control: (base, state) => ({
+    ...base,
+    borderRadius: '0.75rem',
+    borderColor: state.isFocused ? '#111827' : '#e5e7eb',
+    boxShadow: state.isFocused ? '0 0 0 1px #111827' : 'none',
+    padding: '2px',
+    '&:hover': {
+      borderColor: state.isFocused ? '#111827' : '#e5e7eb',
+    }
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected ? '#111827' : state.isFocused ? '#f9fafb' : 'white',
+    color: state.isSelected ? 'white' : '#111827',
+    cursor: 'pointer',
+    '&:active': {
+      backgroundColor: '#111827',
+      color: 'white',
+    }
+  })
+};
 
 const vehicleTypes = [
   {
@@ -51,6 +77,39 @@ const VehicleForm = ({
   handleSubmit,
   navigate,
 }) => {
+  const { brands, fetchingBrands, models, fetchingModels } = useCarData(vehicleData.brand);
+
+  const brandOptions = brands.map(b => ({ value: b, label: b }));
+  if (vehicleData.brand && !brands.includes(vehicleData.brand)) {
+    brandOptions.unshift({ value: vehicleData.brand, label: vehicleData.brand });
+  }
+
+  const modelOptions = models.map(m => ({ value: m, label: m }));
+  if (vehicleData.model && !models.includes(vehicleData.model)) {
+    modelOptions.unshift({ value: vehicleData.model, label: vehicleData.model });
+  }
+
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 30 }, (_, i) => {
+    const year = currentYear - i;
+    return { value: year, label: year.toString() };
+  });
+
+  const colorOptions = [
+    "White", "Black", "Silver", "Gray", "Red", "Blue", "Brown", "Green", "Yellow", "Orange", "Purple", "Gold", "Beige"
+  ].map(c => ({ value: c, label: c }));
+
+  const seatingOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15].map(s => ({ value: s, label: s.toString() }));
+
+  const handleSelectChange = (name, selectedOption) => {
+    handleInputChange({
+      target: {
+        name,
+        value: selectedOption ? selectedOption.value : "",
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
       <div className="mx-auto max-w-4xl">
@@ -84,13 +143,16 @@ const VehicleForm = ({
                 Brand <span className="text-red-500">*</span>
               </label>
 
-              <input
-                type="text"
+              <Select
                 name="brand"
-                value={vehicleData.brand}
-                onChange={handleInputChange}
-                placeholder="Toyota"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
+                value={brandOptions.find(o => o.value === vehicleData.brand) || null}
+                onChange={(option) => handleSelectChange("brand", option)}
+                options={brandOptions}
+                isLoading={fetchingBrands}
+                placeholder={fetchingBrands ? "Loading brands..." : "Select Brand"}
+                styles={customStyles}
+                isClearable
+                isSearchable
               />
 
               {errors.brand && (
@@ -104,13 +166,17 @@ const VehicleForm = ({
                 Model <span className="text-red-500">*</span>
               </label>
 
-              <input
-                type="text"
+              <Select
                 name="model"
-                value={vehicleData.model}
-                onChange={handleInputChange}
-                placeholder="Innova Crysta"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
+                value={modelOptions.find(o => o.value === vehicleData.model) || null}
+                onChange={(option) => handleSelectChange("model", option)}
+                options={modelOptions}
+                isDisabled={!vehicleData.brand || fetchingModels}
+                isLoading={fetchingModels}
+                placeholder={fetchingModels ? "Loading models..." : "Select Model"}
+                styles={customStyles}
+                isClearable
+                isSearchable
               />
 
               {errors.model && (
@@ -124,13 +190,15 @@ const VehicleForm = ({
                 Year <span className="text-red-500">*</span>
               </label>
 
-              <input
-                type="number"
+              <Select
                 name="year"
-                value={vehicleData.year}
-                onChange={handleInputChange}
+                value={yearOptions.find(o => o.value === Number(vehicleData.year)) || null}
+                onChange={(option) => handleSelectChange("year", option)}
+                options={yearOptions}
                 placeholder="2023"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
+                styles={customStyles}
+                isClearable
+                isSearchable
               />
 
               {errors.year && (
@@ -144,13 +212,15 @@ const VehicleForm = ({
                 Color <span className="text-red-500">*</span>
               </label>
 
-              <input
-                type="text"
+              <Select
                 name="color"
-                value={vehicleData.color}
-                onChange={handleInputChange}
+                value={colorOptions.find(o => o.value === vehicleData.color) || null}
+                onChange={(option) => handleSelectChange("color", option)}
+                options={colorOptions}
                 placeholder="White"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
+                styles={customStyles}
+                isClearable
+                isSearchable
               />
 
               {errors.color && (
@@ -186,13 +256,15 @@ const VehicleForm = ({
                 Seating Capacity <span className="text-red-500">*</span>
               </label>
 
-              <input
-                type="number"
+              <Select
                 name="seating_capacity"
-                value={vehicleData.seating_capacity}
-                onChange={handleInputChange}
+                value={seatingOptions.find(o => o.value === Number(vehicleData.seating_capacity)) || null}
+                onChange={(option) => handleSelectChange("seating_capacity", option)}
+                options={seatingOptions}
                 placeholder="5"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors"
+                styles={customStyles}
+                isClearable
+                isSearchable
               />
 
               {errors.seating_capacity && (
