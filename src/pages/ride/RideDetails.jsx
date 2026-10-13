@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  MessageCircle,
 } from "lucide-react";
 import {
   getRideDetails,
@@ -24,6 +25,7 @@ import {
   reachedPickup,
   completeRide,
   pickupPassenger,
+  getConversationByRequest,
 } from "../../services/rideService";
 import { toast } from "react-toastify";
 import useLocationWebSocket from "../../hooks/useLocationWebSocket";
@@ -64,6 +66,11 @@ const RideDetails = ({ mode }) => {
 
   const [actionProcessing, setActionProcessing] = useState(false);
   const [pickupProcessingId, setPickupProcessingId] = useState(null);
+
+  // Map of ride_request_id -> conversation_id (null = no conversation yet)
+  const [passengerConversations, setPassengerConversations] = useState({});
+  // Set of ride_request_ids currently being fetched
+  const [chatLoadingIds, setChatLoadingIds] = useState(new Set());
 
   const isSearchMode = mode === "search";
   const isMyRideMode = mode === "my-ride";
@@ -133,6 +140,51 @@ const RideDetails = ({ mode }) => {
 
     fetchRideDetails();
   }, [rideId]);
+
+  // When ride loads in my-ride mode, fetch conversation IDs for all accepted passengers.
+  useEffect(() => {
+    if (!ride || !isMyRideMode) return;
+
+    const acceptedPassengers = (ride.passengers || []).filter(
+      (p) => p.status === "accepted" || p.status === "picked_up"
+    );
+
+    if (acceptedPassengers.length === 0) return;
+
+    // Only fetch IDs we haven't loaded yet
+    const toFetch = acceptedPassengers.filter(
+      (p) => !(p.ride_request_id in passengerConversations)
+    );
+
+    if (toFetch.length === 0) return;
+
+    setChatLoadingIds((prev) => {
+      const next = new Set(prev);
+      toFetch.forEach((p) => next.add(p.ride_request_id));
+      return next;
+    });
+
+    toFetch.forEach(async (p) => {
+      try {
+        const data = await getConversationByRequest(p.ride_request_id);
+        setPassengerConversations((prev) => ({
+          ...prev,
+          [p.ride_request_id]: data.conversation_id,
+        }));
+      } catch {
+        setPassengerConversations((prev) => ({
+          ...prev,
+          [p.ride_request_id]: null,
+        }));
+      } finally {
+        setChatLoadingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(p.ride_request_id);
+          return next;
+        });
+      }
+    });
+  }, [ride, isMyRideMode]);
 
   const handleStartRide = async () => {
     if (actionProcessing || !ride) return;
@@ -747,6 +799,31 @@ const RideDetails = ({ mode }) => {
                       </div>
 
                       <div className="flex items-center gap-3 self-end sm:self-center">
+                        {/* Chat button for my-ride mode (accepted/picked_up passengers) */}
+                        {isMyRideMode &&
+                          (p.status === "accepted" || p.status === "picked_up") && (
+                            chatLoadingIds.has(p.ride_request_id) ? (
+                              <div className="inline-flex items-center gap-1.5 rounded-xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-400 border border-gray-200">
+                                <Loader2 size={13} className="animate-spin" />
+                                <span>Chat</span>
+                              </div>
+                            ) : passengerConversations[p.ride_request_id] ? (
+                              <button
+                                type="button"
+                                id={`chat-passenger-${p.ride_request_id}`}
+                                onClick={() =>
+                                  navigate(
+                                    `/profile/chat/${passengerConversations[p.ride_request_id]}`
+                                  )
+                                }
+                                className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-gray-700 shrink-0"
+                              >
+                                <MessageCircle size={14} />
+                                <span>Chat</span>
+                              </button>
+                            ) : null
+                          )}
+
                         {canPickup && (
                           <button
                             type="button"
