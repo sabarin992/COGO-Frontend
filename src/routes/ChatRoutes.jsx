@@ -12,7 +12,7 @@ const ChatRoutes = [
     ),
     children: [
       {
-        path: "chat",
+        path: "chat/:conversationId",
         element: <Chat />,
       }
     ],

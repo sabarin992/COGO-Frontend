@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 function Chat() {
   const [messages, setMessages] = useState([]);
@@ -13,7 +14,8 @@ function Chat() {
 
   // Temporary conversation ID
   // We will make this dynamic later.
-  const conversationId = 2;
+  const { conversationId: paramsConversationId } = useParams();
+  const conversationId = Number(paramsConversationId);
 
   // --------------------------------
   // Load current logged-in user
@@ -25,17 +27,14 @@ function Chat() {
           "http://localhost:8000/api/v1/user/profile",
           {
             withCredentials: true,
-          }
+          },
         );
 
         console.log("Current user:", response.data);
 
         setCurrentUser(response.data);
       } catch (error) {
-        console.error(
-          "Failed to load current user:",
-          error
-        );
+        console.error("Failed to load current user:", error);
       }
     };
 
@@ -52,17 +51,14 @@ function Chat() {
           `http://localhost:8000/api/v1/chat/conversations/${conversationId}/messages`,
           {
             withCredentials: true,
-          }
+          },
         );
 
         console.log("Previous messages:", response.data);
 
         setMessages(response.data);
       } catch (error) {
-        console.error(
-          "Failed to load messages:",
-          error
-        );
+        console.error("Failed to load messages:", error);
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +72,7 @@ function Chat() {
   // --------------------------------
   useEffect(() => {
     const socket = new WebSocket(
-      `ws://localhost:8000/api/v1/chat/ws/chat/${conversationId}`
+      `ws://localhost:8000/api/v1/chat/ws/chat/${conversationId}`,
     );
 
     socketRef.current = socket;
@@ -92,10 +88,7 @@ function Chat() {
 
       console.log("Received message:", data);
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        data,
-      ]);
+      setMessages((prevMessages) => [...prevMessages, data]);
     };
 
     socket.onclose = () => {
@@ -134,10 +127,7 @@ function Chat() {
       return;
     }
 
-    if (
-      !socketRef.current ||
-      socketRef.current.readyState !== WebSocket.OPEN
-    ) {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
       console.log("WebSocket is not connected");
       return;
     }
@@ -145,7 +135,7 @@ function Chat() {
     socketRef.current.send(
       JSON.stringify({
         message: message.trim(),
-      })
+      }),
     );
 
     setMessage("");
@@ -187,15 +177,9 @@ function Chat() {
           alignItems: "center",
         }}
       >
-        <h2 style={{ margin: 0 }}>
-          Chat
-        </h2>
+        <h2 style={{ margin: 0 }}>Chat</h2>
 
-        <span>
-          {isConnected
-            ? "🟢 Connected"
-            : "🔴 Disconnected"}
-        </span>
+        <span>{isConnected ? "🟢 Connected" : "🔴 Disconnected"}</span>
       </div>
 
       {/* Messages */}
@@ -212,17 +196,14 @@ function Chat() {
           <p>No messages yet.</p>
         ) : (
           messages.map((msg) => {
-            const isOwnMessage =
-              msg.sender_id === currentUser.id;
+            const isOwnMessage = msg.sender_id === currentUser.id;
 
             return (
               <div
                 key={msg.id}
                 style={{
                   display: "flex",
-                  justifyContent: isOwnMessage
-                    ? "flex-end"
-                    : "flex-start",
+                  justifyContent: isOwnMessage ? "flex-end" : "flex-start",
                   marginBottom: "10px",
                 }}
               >
@@ -231,9 +212,7 @@ function Chat() {
                     maxWidth: "70%",
                     padding: "8px 12px",
                     borderRadius: "10px",
-                    backgroundColor: isOwnMessage
-                      ? "#DCF8C6"
-                      : "#f1f1f1",
+                    backgroundColor: isOwnMessage ? "#DCF8C6" : "#f1f1f1",
                   }}
                 >
                   {/* Sender */}
@@ -244,15 +223,11 @@ function Chat() {
                       marginBottom: "3px",
                     }}
                   >
-                    {isOwnMessage
-                      ? "You"
-                      : `User ${msg.sender_id}`}
+                    {isOwnMessage ? "You" : `User ${msg.sender_id}`}
                   </div>
 
                   {/* Message */}
-                  <div>
-                    {msg.message}
-                  </div>
+                  <div>{msg.message}</div>
 
                   {/* Time */}
                   <div
@@ -262,9 +237,7 @@ function Chat() {
                       marginTop: "4px",
                     }}
                   >
-                    {new Date(
-                      msg.created_at
-                    ).toLocaleTimeString([], {
+                    {new Date(msg.created_at).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
@@ -291,9 +264,7 @@ function Chat() {
         <input
           type="text"
           value={message}
-          onChange={(event) =>
-            setMessage(event.target.value)
-          }
+          onChange={(event) => setMessage(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           disabled={!isConnected}
@@ -307,9 +278,7 @@ function Chat() {
 
         <button
           onClick={sendMessage}
-          disabled={
-            !isConnected || !message.trim()
-          }
+          disabled={!isConnected || !message.trim()}
         >
           Send
         </button>
