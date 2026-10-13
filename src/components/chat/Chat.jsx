@@ -225,7 +225,7 @@ function Chat() {
                       marginBottom: "3px",
                     }}
                   >
-                    {isOwnMessage ? "You" : `User ${msg.sender_id}`}
+                    {isOwnMessage ? "You" : `${msg.sender_name}`}
                   </div>
 
                   {/* Message */}
