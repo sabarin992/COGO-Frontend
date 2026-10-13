@@ -197,6 +197,8 @@ function Chat() {
         ) : (
           messages.map((msg) => {
             const isOwnMessage = msg.sender_id === currentUser.id;
+      
+            
 
             return (
               <div
