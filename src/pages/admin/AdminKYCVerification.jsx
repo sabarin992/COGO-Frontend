@@ -216,6 +216,7 @@ const AdminKYCVerification = () => {
       }
 
       setModalOpen(false);
+      setReviewModalOpen(false);
 
       fetchKycRecords(currentPage, debouncedSearch, statusFilter);
     } catch (error) {
