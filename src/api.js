@@ -126,7 +126,7 @@ api.interceptors.response.use(
           }
         }
 
-        return new Promise(() => {});
+        return Promise.reject(refreshError);
       }
     }
 
