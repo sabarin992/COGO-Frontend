@@ -1,66 +1,103 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { logout } from "../services/authService";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { User } from "lucide-react";
 
-import { getUserProfile } from "../services/userService";
+import { logout } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
+import usePostRide from "../hooks/usePostRide";
 
 const Header = () => {
+  // --------------------------------------------------
+  // State Management
+  // --------------------------------------------------
+
+  // Controls the mobile navigation menu.
   const [open, setOpen] = useState(false);
+
+  // Controls the desktop side drawer.
   const [desktopOpen, setDesktopOpen] = useState(false);
-  const { isAuthenticated: isLoggedIn, setIsAuthenticated: setIsLoggedIn } =
-    useAuth();
+
+  // Authentication state from the global AuthContext.
+  const {
+    isAuthenticated: isLoggedIn,
+    setIsAuthenticated: setIsLoggedIn,
+  } = useAuth();
+
+  // React Router navigation and current route information.
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handlePostRideClick = async () => {
-    try {
-      const data = await getUserProfile();
-      if (data && data.role === "rider") {
-        navigate("/ride/post-ride");
-      } else {
-        toast.error("Only users with the Rider role can post a ride.");
-      }
-    } catch (err) {
-      toast.error("Only users with the Rider role can post a ride.");
-    }
-  };
+  // Shared handler for checking the user's role before posting a ride.
+  const { handlePostRideClick } = usePostRide();
 
-  // Check whether the current route matches the given path
+  // --------------------------------------------------
+  // Navigation Helpers
+  // --------------------------------------------------
+
+  // Returns true when the current URL matches the given path.
   const isActive = (path) => location.pathname === path;
 
-  // logout function
+  // Navigate to a page and close the mobile menu.
+  const handleNavigation = (path) => {
+    navigate(path);
+    setOpen(false);
+    setDesktopOpen(false);
+  };
+
+  // --------------------------------------------------
+  // Logout Handler
+  // --------------------------------------------------
+
   const handleLogout = async () => {
     try {
+      // Call the backend logout API to clear the authentication session.
       const data = await logout();
-      toast.success(data?.message || "Logged out successfully");
+
+      // Update the global authentication state.
       setIsLoggedIn(false);
+
+      // Close both menus and redirect to the login page.
+      setOpen(false);
+      setDesktopOpen(false);
       navigate("/login", { replace: true });
+
+      toast.success(data?.message || "Logged out successfully");
     } catch (error) {
-      toast.error(error?.response?.data || "Logout failed");
+      // Display an error if the logout request fails.
+      const message =
+        error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        "Logout failed";
+
+      toast.error(message);
     }
   };
+
+  // --------------------------------------------------
+  // Render Header
+  // --------------------------------------------------
 
   return (
     <>
       <header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          {/* Left Logo */}
+
+          {/* Logo: Navigate to the home page. */}
           <div
             className="text-3xl font-black tracking-tight text-black cursor-pointer"
-            onClick={() => {
-              navigate("/");
-            }}
+            onClick={() => handleNavigation("/")}
           >
             COGO
           </div>
 
-          {/* Center Menu */}
+          {/* Desktop Navigation: Visible on medium screens and larger. */}
           <nav className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
-            <a
-              onClick={() => navigate("/ride/search")}
+
+            {/* Navigate to ride search. */}
+            <button
+              type="button"
+              onClick={() => handleNavigation("/ride/search")}
               className={`font-semibold cursor-pointer pb-1 ${
                 isActive("/ride/search")
                   ? "text-black border-b-2 border-black"
@@ -68,9 +105,11 @@ const Header = () => {
               }`}
             >
               Find a Ride
-            </a>
+            </button>
 
-            <a
+            {/* Verify the user's role before allowing ride posting. */}
+            <button
+              type="button"
               onClick={handlePostRideClick}
               className={`font-semibold cursor-pointer pb-1 ${
                 isActive("/ride/post-ride")
@@ -79,69 +118,57 @@ const Header = () => {
               }`}
             >
               Post a Ride
-            </a>
-
-
-            {/* <a
-              onClick={() => navigate("/ride/my-rides")}
-              className={`font-semibold cursor-pointer pb-1 ${
-                isActive("/ride/my-rides")
-                  ? "text-black border-b-2 border-black"
-                  : "text-gray-600 hover:text-black"
-              }`}
-            >
-              My Rides
-            </a> */}
+            </button>
           </nav>
 
-          {/* Right Hamburger / Actions (Only render Hamburger options if user is logged in) */}
+          {/* Right Section: Show account actions or Sign In. */}
           {isLoggedIn ? (
             <>
-              {/* Mobile Hamburger (Click to toggle Mobile Menu) */}
+              {/* Mobile hamburger button. */}
               <button
-                onClick={() => setOpen(!open)}
+                type="button"
+                aria-label="Open mobile menu"
+                aria-expanded={open}
+                onClick={() => setOpen((prev) => !prev)}
                 className="flex flex-col gap-1.5 md:hidden cursor-pointer"
               >
-                <span className="w-6 h-0.5 bg-black"></span>
-                <span className="w-6 h-0.5 bg-black"></span>
-                <span className="w-6 h-0.5 bg-black"></span>
+                <span className="w-6 h-0.5 bg-black" />
+                <span className="w-6 h-0.5 bg-black" />
+                <span className="w-6 h-0.5 bg-black" />
               </button>
 
-              {/* Desktop Hamburger (Click to open Drawer Panel) */}
-              {/* <button
-                onClick={() => setDesktopOpen(true)}
-                className="hidden md:flex flex-col gap-1.5 cursor-pointer hover:opacity-75 transition-opacity"
-              >
-                <span className="w-6 h-0.5 bg-black"></span>
-                <span className="w-6 h-0.5 bg-black"></span>
-                <span className="w-6 h-0.5 bg-black"></span>
-              </button> */}
+              {/* Desktop profile and menu actions. */}
               <div className="hidden md:flex items-center gap-6">
-                {/* Profile Icon */}
+
+                {/* Navigate to the user's profile. */}
                 <button
-                  onClick={() => {
-                    navigate("/profile");
-                  }}
+                  type="button"
+                  aria-label="Open profile"
+                  onClick={() => handleNavigation("/profile")}
                   className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
                 >
                   <User size={18} />
                 </button>
 
-                {/* Hamburger Menu */}
+                {/* Open the desktop side drawer. */}
                 <button
+                  type="button"
+                  aria-label="Open navigation menu"
+                  aria-expanded={desktopOpen}
                   onClick={() => setDesktopOpen(true)}
                   className="flex flex-col gap-1.5 cursor-pointer hover:opacity-75 transition-opacity"
                 >
-                  <span className="w-6 h-0.5 bg-black"></span>
-                  <span className="w-6 h-0.5 bg-black"></span>
-                  <span className="w-6 h-0.5 bg-black"></span>
+                  <span className="w-6 h-0.5 bg-black" />
+                  <span className="w-6 h-0.5 bg-black" />
+                  <span className="w-6 h-0.5 bg-black" />
                 </button>
               </div>
             </>
           ) : (
-            /* Simple login button for non-authenticated guests */
+            /* Guests can navigate to the login page. */
             <button
-              onClick={() => navigate("/login")}
+              type="button"
+              onClick={() => handleNavigation("/login")}
               className="px-5 py-2.5 bg-black text-white hover:bg-gray-800 transition duration-200 text-sm font-semibold rounded-full cursor-pointer"
             >
               Sign In
@@ -149,31 +176,38 @@ const Header = () => {
           )}
         </div>
 
-        {/* Mobile Menu (Only visible if logged in and hamburger clicked) */}
+        {/* ------------------------------------------------
+            Mobile Navigation Menu
+            Displayed only for authenticated users.
+        -------------------------------------------------- */}
         {open && isLoggedIn && (
           <div className="md:hidden border-t border-gray-200 bg-white px-4 py-5">
             <nav className="flex flex-col gap-5">
-              <a
-                href="#"
-                className="text-black font-semibold border-b border-black pb-2"
+
+              {/* Navigate to ride search. */}
+              <button
+                type="button"
+                onClick={() => handleNavigation("/ride/search")}
+                className="text-left text-gray-600 hover:text-black transition"
               >
                 Find a Ride
-              </a>
+              </button>
 
-              <a
-                className="text-gray-600 hover:text-black transition"
+              {/* Reuse the shared rider-role validation handler. */}
+              <button
+                type="button"
                 onClick={() => {
-                  navigate("/post-ride");
+                  setOpen(false);
+                  handlePostRideClick();
                 }}
+                className="text-left text-gray-600 hover:text-black transition"
               >
                 Post a Ride
-              </a>
+              </button>
 
-              {/* <a href="#" className="text-gray-600 hover:text-black transition">
-                My Rides
-              </a> */}
-
+              {/* Log out and redirect to the login page. */}
               <button
+                type="button"
                 onClick={handleLogout}
                 className="text-red-600 hover:text-red-700 font-semibold transition text-left cursor-pointer"
               >
@@ -184,27 +218,36 @@ const Header = () => {
         )}
       </header>
 
-      {/* Desktop Drawer Panel (Only opens if logged in) */}
+      {/* ------------------------------------------------
+          Desktop Side Drawer
+          Displayed only when an authenticated user opens it.
+      -------------------------------------------------- */}
       {desktopOpen && isLoggedIn && (
         <>
-          {/* Backdrop Blur Overlay */}
+          {/* Backdrop: Clicking outside the drawer closes it. */}
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-all duration-300 animate-in fade-in"
             onClick={() => setDesktopOpen(false)}
           />
 
-          {/* Drawer Panel content */}
-          <aside className="fixed top-0 right-0 h-screen w-80 bg-white shadow-2xl z-[100] flex flex-col p-6 animate-in slide-in-from-right duration-300 ease-in-out">
-            {/* Header / Cross Button */}
+          {/* Side drawer containing account actions. */}
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+            className="fixed top-0 right-0 h-screen w-80 bg-white shadow-2xl z-[100] flex flex-col p-6 animate-in slide-in-from-right duration-300 ease-in-out"
+          >
+            {/* Drawer header and close button. */}
             <div className="flex justify-between items-center pb-6 border-b border-gray-100">
               <span className="text-2xl font-black tracking-tight text-black">
                 COGO
               </span>
 
               <button
+                type="button"
+                aria-label="Close navigation menu"
                 onClick={() => setDesktopOpen(false)}
                 className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 transition-all cursor-pointer"
-                title="Close Menu"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -223,57 +266,11 @@ const Header = () => {
               </button>
             </div>
 
-            {/* Profile Greeting Section */}
-            {/* <div className="py-6 flex items-center gap-4 border-b border-gray-100 mb-6">
-              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">
-                U
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-black leading-none">
-                  Welcome back
-                </p>
-
-                <p className="text-xs text-gray-500 mt-1">
-                  Consumer Account
-                </p>
-              </div>
-            </div> */}
-
-            {/* Menu Links */}
-            {/* <nav className="flex-1 flex flex-col gap-4">
-              <a
-                href="#"
-                onClick={() => setDesktopOpen(false)}
-                className="text-black font-semibold text-base py-2 hover:translate-x-1.5 transition-transform"
-              >
-                Find a Ride
-              </a>
-
-              <a
-                href="#"
-                onClick={() => setDesktopOpen(false)}
-                className="text-gray-600 hover:text-black transition py-2 hover:translate-x-1.5 transition-transform"
-              >
-                Post a Ride
-              </a>
-
-              <a
-                href="#"
-                onClick={() => setDesktopOpen(false)}
-                className="text-gray-600 hover:text-black transition py-2 hover:translate-x-1.5 transition-transform"
-              >
-                My Rides
-              </a>
-            </nav> */}
-
-            {/* Red Logout Action Button */}
-            <div className="pt-6 border-t border-gray-100">
+            {/* Logout action at the bottom of the drawer. */}
+            <div className="mt-auto pt-6 border-t border-gray-100">
               <button
-                onClick={() => {
-                  setDesktopOpen(false);
-                  handleLogout();
-                }}
+                type="button"
+                onClick={handleLogout}
                 className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg
@@ -297,10 +294,12 @@ const Header = () => {
         </>
       )}
 
-      {/* Spacer */}
-      <div className="h-16"></div>
+      {/* Spacer: Prevent page content from hiding behind the fixed header. */}
+      <div className="h-16" />
     </>
   );
 };
 
 export default Header;
+
+
