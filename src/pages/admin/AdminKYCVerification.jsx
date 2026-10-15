@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,7 +6,7 @@ import ConfirmationModal from "../../components/modals/ConfirmationModal";
 
 import KycHeader from "../../components/admin/kyc/KycHeader";
 import KycTable from "../../components/admin/kyc/KycTable";
-import KycPagination from "../../components/admin/kyc/KycPagination";
+import Pagination from "../../components/common/Pagination";
 import KycReviewModal from "../../components/admin/kyc/KycReviewModal";
 import ImagePreviewModal from "../../components/admin/kyc/ImagePreviewModal";
 
@@ -28,7 +26,7 @@ const AdminKYCVerification = () => {
   const [loading, setLoading] = useState(false);
 
   // Pagination
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -48,7 +46,7 @@ const AdminKYCVerification = () => {
 
   // Reject Form
   const [rejectionCategory, setRejectionCategory] = useState(
-    "Blurry or Unreadable Image"
+    "Blurry or Unreadable Image",
   );
 
   const [rejectionDetails, setRejectionDetails] = useState("");
@@ -92,19 +90,14 @@ const AdminKYCVerification = () => {
 
     window.addEventListener("keydown", handleKeyDown);
 
-    return () =>
-      window.removeEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   /* -----------------------------------------
         Fetch KYC List
   ------------------------------------------*/
 
-  const fetchKycRecords = async (
-    page = 1,
-    search = "",
-    status = "All"
-  ) => {
+  const fetchKycRecords = async (page = 1, search = "", status = "All") => {
     setLoading(true);
 
     try {
@@ -125,9 +118,7 @@ const AdminKYCVerification = () => {
         setSelectedKyc((prev) => {
           if (!prev) return items[0];
 
-          const found = items.find(
-            (i) => i.kyc_id === prev.kyc_id
-          );
+          const found = items.find((i) => i.kyc_id === prev.kyc_id);
 
           return found || items[0];
         });
@@ -136,8 +127,7 @@ const AdminKYCVerification = () => {
       }
     } catch (error) {
       toast.error(
-        error?.response?.data?.detail ||
-          "Failed to fetch KYC records"
+        error?.response?.data?.detail || "Failed to fetch KYC records",
       );
     } finally {
       setLoading(false);
@@ -149,16 +139,8 @@ const AdminKYCVerification = () => {
   ------------------------------------------*/
 
   useEffect(() => {
-    fetchKycRecords(
-      currentPage,
-      debouncedSearch,
-      statusFilter
-    );
-  }, [
-    currentPage,
-    debouncedSearch,
-    statusFilter,
-  ]);
+    fetchKycRecords(currentPage, debouncedSearch, statusFilter);
+  }, [currentPage, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -226,41 +208,28 @@ const AdminKYCVerification = () => {
       if (modalConfig.actionType === "approve") {
         await approveKyc(selectedKyc.kyc_id);
 
-        toast.success(
-          `KYC for ${selectedKyc.user_name} approved successfully`
-        );
+        toast.success(`KYC for ${selectedKyc.user_name} approved successfully`);
       } else {
-        await rejectKyc(
-          selectedKyc.kyc_id,
-          modalConfig.reasonToSubmit
-        );
+        await rejectKyc(selectedKyc.kyc_id, modalConfig.reasonToSubmit);
 
-        toast.success(
-          `KYC for ${selectedKyc.user_name} rejected successfully`
-        );
+        toast.success(`KYC for ${selectedKyc.user_name} rejected successfully`);
       }
 
       setModalOpen(false);
 
-      fetchKycRecords(
-        currentPage,
-        debouncedSearch,
-        statusFilter
-      );
+      fetchKycRecords(currentPage, debouncedSearch, statusFilter);
     } catch (error) {
       toast.error(
-        error?.response?.data?.detail ||
-          "Action failed. Please try again."
+        error?.response?.data?.detail || "Action failed. Please try again.",
       );
     } finally {
       setActionLoading(false);
     }
   };
 
-    return (
+  return (
     <>
       <div className="space-y-6 p-10">
-
         {/* Header */}
 
         <KycHeader
@@ -280,12 +249,12 @@ const AdminKYCVerification = () => {
 
         {/* Pagination */}
 
-        <KycPagination
+        <Pagination
           currentPage={currentPage}
-          totalPages={totalPages}
           totalItems={totalItems}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
+          itemLabel="KYC records"
         />
       </div>
 

@@ -5,18 +5,10 @@ import {
   unblockUser,
 } from "../../services/userService";
 import { useOutletContext } from "react-router-dom";
-import {
-  Plus,
-  SlidersHorizontal,
-  Download,
-  Star,
-  Ban,
-  Unlock,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { SlidersHorizontal, Download, Star, Ban, Unlock } from "lucide-react";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import Pagination from "../../components/common/Pagination";
 
 const AdminUser = () => {
   // Users and Loading State
@@ -27,6 +19,7 @@ const AdminUser = () => {
   const { searchQuery, setSearchQuery } = useOutletContext();
   const [currentPage, setCurrentPage] = useState(1);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+  const ITEMS_PER_PAGE = 5;
 
   // Confirmation Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -88,10 +81,7 @@ const AdminUser = () => {
   }, [debouncedSearchQuery, statusFilter, currentPage]);
 
   // Pagination Logic
-  const ITEMS_PER_PAGE = 5;
-  const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
-  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+  
   const currentItems = users;
 
   // Reset page when search or status filters change
@@ -319,53 +309,15 @@ const AdminUser = () => {
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="px-6 py-5 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              Showing {totalUsers > 0 ? indexOfFirstItem + 1 : 0} to{" "}
-              {Math.min(indexOfLastItem, totalUsers)} of {totalUsers} users
-            </p>
+          {/* Reusable pagination component */}
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalUsers}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+            itemLabel="users"
+          />
 
-            {totalPages > 1 && (
-              <div className="flex gap-2">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronLeft className="w-[18px] h-[18px] text-gray-600" />
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                        currentPage === page
-                          ? "bg-black text-white"
-                          : "border border-gray-200 hover:bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ),
-                )}
-
-                <button
-                  disabled={currentPage === totalPages}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronRight className="w-[18px] h-[18px] text-gray-600" />
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
