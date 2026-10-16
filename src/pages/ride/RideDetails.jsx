@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  MessageCircle,
 } from "lucide-react";
 import {
   getRideDetails,
@@ -24,8 +25,11 @@ import {
   reachedPickup,
   completeRide,
   pickupPassenger,
+  getConversationByRequest,
 } from "../../services/rideService";
 import { toast } from "react-toastify";
+import useLocationWebSocket from "../../hooks/useLocationWebSocket";
+import LiveTrackingMap from "../../components/map/LiveTrackingMap";
 
 const getStatusBadgeStyle = (status) => {
   switch (status?.toUpperCase()) {
@@ -63,8 +67,54 @@ const RideDetails = ({ mode }) => {
   const [actionProcessing, setActionProcessing] = useState(false);
   const [pickupProcessingId, setPickupProcessingId] = useState(null);
 
+  // Map of ride_request_id -> conversation_id (null = no conversation yet)
+  const [passengerConversations, setPassengerConversations] = useState({});
+  // Set of ride_request_ids currently being fetched
+  const [chatLoadingIds, setChatLoadingIds] = useState(new Set());
+
   const isSearchMode = mode === "search";
   const isMyRideMode = mode === "my-ride";
+
+  // Statuses during which live location tracking is active.
+  const ACTIVE_TRACKING_STATUSES = ["STARTED", "REACHED_PICKUP", "ONGOING"];
+  const isTrackingActive =
+    isMyRideMode && ride && ACTIVE_TRACKING_STATUSES.includes(ride.status);
+
+  // Driver location broadcasting — only runs when tracking is active.
+  const { status: wsStatus, geoError, wsError } = useLocationWebSocket({
+    rideId: ride?.ride_id ?? null,
+    role: "driver",
+    enabled: isTrackingActive,
+  });
+
+  // Track the driver's own GPS coordinates so the map can centre on them.
+  const [driverOwnLocation, setDriverOwnLocation] = React.useState(null);
+
+  useEffect(() => {
+    if (!isTrackingActive) {
+      setDriverOwnLocation(null);
+      return;
+    }
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) =>
+        setDriverOwnLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {}, // errors handled by useLocationWebSocket
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [isTrackingActive]);
+
+  // Notify the driver when geolocation is unavailable.
+  const prevGeoError = React.useRef(null);
+  useEffect(() => {
+    if (geoError && geoError !== prevGeoError.current) {
+      toast.error(geoError);
+      prevGeoError.current = geoError;
+    }
+  }, [geoError]);
 
   useEffect(() => {
     const fetchRideDetails = async () => {
@@ -90,6 +140,56 @@ const RideDetails = ({ mode }) => {
 
     fetchRideDetails();
   }, [rideId]);
+
+  // When ride loads in my-ride mode, fetch conversation IDs for all accepted passengers.
+  useEffect(() => {
+    if (!ride || !isMyRideMode) return;
+
+    const acceptedPassengers = (ride.passengers || []).filter(
+      (p) =>
+        p.status?.toLowerCase() === "accepted" ||
+        p.status?.toLowerCase() === "picked_up"
+    );
+
+    if (acceptedPassengers.length === 0) return;
+
+    // Only fetch IDs we haven't loaded yet
+    const toFetch = acceptedPassengers.filter(
+      (p) =>
+        !passengerConversations[p.ride_request_id] &&
+        !chatLoadingIds.has(p.ride_request_id)
+    );
+
+    if (toFetch.length === 0) return;
+
+    setChatLoadingIds((prev) => {
+      const next = new Set(prev);
+      toFetch.forEach((p) => next.add(p.ride_request_id));
+      return next;
+    });
+
+    toFetch.forEach(async (p) => {
+      try {
+        const data = await getConversationByRequest(p.ride_request_id);
+        setPassengerConversations((prev) => ({
+          ...prev,
+          [p.ride_request_id]: data.conversation_id,
+        }));
+      } catch (err) {
+        console.error("Failed to load conversation for passenger:", p.ride_request_id, err);
+        setPassengerConversations((prev) => ({
+          ...prev,
+          [p.ride_request_id]: null,
+        }));
+      } finally {
+        setChatLoadingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(p.ride_request_id);
+          return next;
+        });
+      }
+    });
+  }, [ride, isMyRideMode]);
 
   const handleStartRide = async () => {
     if (actionProcessing || !ride) return;
@@ -472,6 +572,30 @@ const RideDetails = ({ mode }) => {
                 </div>
               </div>
             )}
+
+            {/* WebSocket error banner — shown only when tracking is or was active */}
+            {wsError && (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                <strong>Location:</strong> {wsError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Live Location Map — driver view (my-ride mode, active statuses) */}
+        {isTrackingActive && (
+          <div className="mb-6">
+            <LiveTrackingMap
+              driverLocation={driverOwnLocation}
+              label={`Your Live Location · ${wsStatus === "open" ? "Sharing" : "Connecting…"}`}
+            />
+            {wsStatus !== "open" && (
+              <p className="mt-2 text-center text-xs text-gray-400">
+                {wsStatus === "connecting"
+                  ? "Connecting to location service…"
+                  : "Location sharing paused."}
+              </p>
+            )}
           </div>
         )}
 
@@ -680,6 +804,32 @@ const RideDetails = ({ mode }) => {
                       </div>
 
                       <div className="flex items-center gap-3 self-end sm:self-center">
+                        {/* Chat button for my-ride mode (accepted/picked_up passengers) */}
+                        {isMyRideMode &&
+                          (p.status?.toLowerCase() === "accepted" ||
+                            p.status?.toLowerCase() === "picked_up") && (
+                            chatLoadingIds.has(p.ride_request_id) ? (
+                              <div className="inline-flex items-center gap-1.5 rounded-xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-400 border border-gray-200">
+                                <Loader2 size={13} className="animate-spin" />
+                                <span>Chat</span>
+                              </div>
+                            ) : passengerConversations[p.ride_request_id] ? (
+                              <button
+                                type="button"
+                                id={`chat-passenger-${p.ride_request_id}`}
+                                onClick={() =>
+                                  navigate(
+                                    `/profile/chat/${passengerConversations[p.ride_request_id]}`
+                                  )
+                                }
+                                className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-gray-700 shrink-0 cursor-pointer"
+                              >
+                                <MessageCircle size={14} />
+                                <span>Chat</span>
+                              </button>
+                            ) : null
+                          )}
+
                         {canPickup && (
                           <button
                             type="button"

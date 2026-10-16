@@ -11,13 +11,17 @@ import {
   ShieldCheck,
   Loader2,
   Navigation,
+  MessageCircle,
 } from "lucide-react";
 import {
   getSingleRideRequestDetails,
   cancelRideRequest,
+  getConversationByRequest,
 } from "../../services/rideService";
 import ConfirmationModal from "../../components/modals/ConfirmationModal";
 import { toast } from "react-toastify";
+import useLocationWebSocket from "../../hooks/useLocationWebSocket";
+import LiveTrackingMap from "../../components/map/LiveTrackingMap";
 
 const MyBookingDetails = () => {
   const { requestId } = useParams();
@@ -29,6 +33,26 @@ const MyBookingDetails = () => {
 
   const [processing, setProcessing] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // Chat conversation lookup
+  const [conversationId, setConversationId] = useState(null);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  // Active ride statuses for which the passenger can receive location updates.
+  // booking.status must be "accepted" or "picked_up" (confirmed by the backend).
+  const ACTIVE_TRACKING_STATUSES = ["STARTED", "REACHED_PICKUP", "ONGOING"];
+  const isPassengerTrackingActive =
+    booking !== null &&
+    ACTIVE_TRACKING_STATUSES.includes(booking.ride_status) &&
+    (booking.status === "accepted" || booking.status === "picked_up");
+
+  // Connect as a passenger — receive driver location updates.
+  // The WebSocket URL uses ride_id (not ride_request_id).
+  const { driverLocation, wsError: locationWsError } = useLocationWebSocket({
+    rideId: booking?.ride_id ?? null,
+    role: "passenger",
+    enabled: isPassengerTrackingActive,
+  });
 
   const fetchDetails = async () => {
     try {
@@ -56,6 +80,31 @@ const MyBookingDetails = () => {
       fetchDetails();
     }
   }, [requestId]);
+
+  // Fetch the conversation ID once booking details are loaded
+  // (only relevant when the booking is accepted)
+  useEffect(() => {
+    if (!booking) return;
+    const canChat =
+      booking.status?.toLowerCase() === "accepted" ||
+      booking.status?.toLowerCase() === "picked_up";
+    if (!canChat) return;
+
+    const fetchConversation = async () => {
+      setChatLoading(true);
+      try {
+        const data = await getConversationByRequest(booking.ride_request_id);
+        setConversationId(data.conversation_id);
+      } catch {
+        // No conversation yet — keep conversationId as null
+        setConversationId(null);
+      } finally {
+        setChatLoading(false);
+      }
+    };
+
+    fetchConversation();
+  }, [booking]);
 
   const handleConfirmCancel = async () => {
     if (!booking) return;
@@ -178,13 +227,33 @@ const MyBookingDetails = () => {
           </p>
         </div>
 
-        <span
-          className={`self-start sm:self-auto inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold border ${getStatusBadge(
-            booking.status
-          )}`}
-        >
-          {booking.status?.toUpperCase()}
-        </span>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          {/* Chat button — shown only when a conversation exists */}
+          {chatLoading ? (
+            <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-1.5 text-xs font-semibold text-gray-500 border border-gray-200">
+              <Loader2 size={14} className="animate-spin" />
+              <span>Chat</span>
+            </div>
+          ) : conversationId ? (
+            <button
+              type="button"
+              id="booking-chat-btn"
+              onClick={() => navigate(`/profile/chat/${conversationId}`)}
+              className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-gray-800 transition"
+            >
+              <MessageCircle size={14} />
+              <span>Chat</span>
+            </button>
+          ) : null}
+
+          <span
+            className={`inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold border ${getStatusBadge(
+              booking.status
+            )}`}
+          >
+            {booking.status?.toUpperCase()}
+          </span>
+        </div>
       </div>
 
       {/* Ride Information Card */}
@@ -250,6 +319,21 @@ const MyBookingDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Live Driver Location — shown when tracking is active for this passenger */}
+      {isPassengerTrackingActive && (
+        <div>
+          <LiveTrackingMap
+            driverLocation={driverLocation}
+            label="Driver\'s Live Location"
+          />
+          {locationWsError && (
+            <p className="mt-2 text-center text-xs text-amber-700">
+              {locationWsError}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Driver Information Card */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
