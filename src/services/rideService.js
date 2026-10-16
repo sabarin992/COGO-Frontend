@@ -157,5 +157,12 @@ export const completeRide = async (rideId) => {
 };
 
 
-
-
+// Get the conversation_id linked to a specific ride request.
+// Returns { conversation_id } if found, or throws a 404 error if
+// the request has not been accepted yet (no conversation created).
+export const getConversationByRequest = async (rideRequestId) => {
+  const response = await api.get(
+    `/chat/conversations/by-request/${rideRequestId}`
+  );
+  return response.data; // { conversation_id: <number> }
+};
