@@ -146,14 +146,18 @@ const RideDetails = ({ mode }) => {
     if (!ride || !isMyRideMode) return;
 
     const acceptedPassengers = (ride.passengers || []).filter(
-      (p) => p.status === "accepted" || p.status === "picked_up"
+      (p) =>
+        p.status?.toLowerCase() === "accepted" ||
+        p.status?.toLowerCase() === "picked_up"
     );
 
     if (acceptedPassengers.length === 0) return;
 
     // Only fetch IDs we haven't loaded yet
     const toFetch = acceptedPassengers.filter(
-      (p) => !(p.ride_request_id in passengerConversations)
+      (p) =>
+        !passengerConversations[p.ride_request_id] &&
+        !chatLoadingIds.has(p.ride_request_id)
     );
 
     if (toFetch.length === 0) return;
@@ -171,7 +175,8 @@ const RideDetails = ({ mode }) => {
           ...prev,
           [p.ride_request_id]: data.conversation_id,
         }));
-      } catch {
+      } catch (err) {
+        console.error("Failed to load conversation for passenger:", p.ride_request_id, err);
         setPassengerConversations((prev) => ({
           ...prev,
           [p.ride_request_id]: null,
@@ -801,7 +806,8 @@ const RideDetails = ({ mode }) => {
                       <div className="flex items-center gap-3 self-end sm:self-center">
                         {/* Chat button for my-ride mode (accepted/picked_up passengers) */}
                         {isMyRideMode &&
-                          (p.status === "accepted" || p.status === "picked_up") && (
+                          (p.status?.toLowerCase() === "accepted" ||
+                            p.status?.toLowerCase() === "picked_up") && (
                             chatLoadingIds.has(p.ride_request_id) ? (
                               <div className="inline-flex items-center gap-1.5 rounded-xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-400 border border-gray-200">
                                 <Loader2 size={13} className="animate-spin" />
@@ -816,7 +822,7 @@ const RideDetails = ({ mode }) => {
                                     `/profile/chat/${passengerConversations[p.ride_request_id]}`
                                   )
                                 }
-                                className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-gray-700 shrink-0"
+                                className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-gray-700 shrink-0 cursor-pointer"
                               >
                                 <MessageCircle size={14} />
                                 <span>Chat</span>
