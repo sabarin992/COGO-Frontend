@@ -62,8 +62,8 @@ const MyRides = () => {
 
       setRides((currentRides) =>
         currentRides.filter(
-          (currentRide) => currentRide.ride_id !== selectedRide.ride_id
-        )
+          (currentRide) => currentRide.ride_id !== selectedRide.ride_id,
+        ),
       );
 
       setShowDeleteModal(false);
@@ -75,7 +75,7 @@ const MyRides = () => {
       toast.error(
         error.response?.data?.message ||
           error.response?.data?.detail ||
-          "Failed to delete ride. Please try again."
+          "Failed to delete ride. Please try again.",
       );
     }
   };
@@ -104,11 +104,12 @@ const MyRides = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Posted Rides</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage your active ride offerings, view route details, and check incoming passenger requests.
+            Manage your active ride offerings, view route details, and check
+            incoming passenger requests.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
           <span className="px-3.5 py-1.5 rounded-full bg-black text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 shrink-0">
             <Car size={14} />
             {rides.length} {rides.length === 1 ? "Active Ride" : "Active Rides"}
@@ -118,6 +119,22 @@ const MyRides = () => {
             type="button"
             onClick={handlePostRideClick}
             className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-gray-800 transition shrink-0"
+          >
+            <Plus size={16} />
+            <span>Post a Ride</span>
+          </button>
+        </div> */}
+
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="px-3.5 py-1.5 rounded-full bg-black text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 shrink-0">
+            <Car size={14} />
+            {rides.length} {rides.length === 1 ? "Active Ride" : "Active Rides"}
+          </span>
+
+          <button
+            type="button"
+            onClick={handlePostRideClick}
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-black px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-gray-800 transition shrink-0"
           >
             <Plus size={16} />
             <span>Post a Ride</span>

@@ -15,10 +15,8 @@ const ProfileHeader = () => {
   const [desktopOpen, setDesktopOpen] = useState(false);
 
   // Get authentication state and its updater from AuthContext.
-  const {
-    isAuthenticated: isLoggedIn,
-    setIsAuthenticated: setIsLoggedIn,
-  } = useAuth();
+  const { isAuthenticated: isLoggedIn, setIsAuthenticated: setIsLoggedIn } =
+    useAuth();
 
   // React Router navigation.
   const navigate = useNavigate();
@@ -73,7 +71,6 @@ const ProfileHeader = () => {
       {/* Main fixed navigation header. */}
       <header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-
           {/* Logo: Navigate to the home page. */}
           <div
             className="text-3xl font-black tracking-tight text-black cursor-pointer"
@@ -82,9 +79,8 @@ const ProfileHeader = () => {
             COGO
           </div>
 
-          {/* Primary navigation links. */}
-          <nav className="flex gap-10">
-
+          {/* Primary navigation links: hidden on mobile. */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-10">
             {/* Navigate to the ride search page. */}
             <button
               type="button"
@@ -107,8 +103,8 @@ const ProfileHeader = () => {
             </button>
           </nav>
 
-          {/* Desktop menu button. */}
-          <div className="hidden md:flex items-center gap-6">
+          {/* Navigation menu button: visible on all screen sizes. */}
+          <div className="flex items-center">
             <button
               type="button"
               aria-label="Open navigation menu"
@@ -207,4 +203,3 @@ const ProfileHeader = () => {
 };
 
 export default ProfileHeader;
-

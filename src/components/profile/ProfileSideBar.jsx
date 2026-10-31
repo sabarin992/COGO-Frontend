@@ -17,7 +17,7 @@ import {
   LogOut,
 } from "lucide-react";
 
-const ProfileSideBar = () => {
+const ProfileSideBar = ({ onNavigate }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { setIsAuthenticated: setIsLoggedIn } = useAuth();
@@ -107,47 +107,46 @@ const ProfileSideBar = () => {
       name: "Password Management",
       icon: Lock,
       path: "/profile/password",
-      enable:false
+      enable: false,
     },
     {
       name: "Wallet",
       icon: Wallet,
       path: "/profile/wallet",
-      enable:false
+      enable: false,
     },
     {
       name: "Payments",
       icon: CreditCard,
       path: "/profile/payments",
-      enable:false
+      enable: false,
     },
     {
       name: "SOS Management",
       icon: "SOS",
       path: "/profile/sos",
-      enable:false
+      enable: false,
     },
     {
       name: "Ride History",
       icon: History,
       path: "/profile/rides",
-      enable:false
+      enable: false,
     },
   ];
 
   const handleItemClick = (item) => {
-        if (item.enable){
-          navigate(item.path)
-        }
-        else{
-          toast.info(`${item.name} is coming soon`)
-        }
-   
+    if (item.enable) {
+      navigate(item.path);
+      onNavigate?.();
+    } else {
+      toast.info(`${item.name} is coming soon`);
+    }
   };
 
   return (
     <div className="w-full flex flex-col gap-1 transition-all duration-300">
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-0.5">
         {menuItems.map((item) => {
           const active = isActive(item.path);
           const Icon = item.icon;
@@ -156,7 +155,7 @@ const ProfileSideBar = () => {
             <button
               key={item.name}
               onClick={() => handleItemClick(item)}
-              className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 cursor-pointer ${
+              className={`w-full flex items-center gap-4 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 cursor-pointer ${
                 active
                   ? "bg-black text-white shadow-sm font-semibold"
                   : "text-gray-600 hover:text-black hover:bg-gray-100/60"
@@ -166,7 +165,9 @@ const ProfileSideBar = () => {
                 {item.icon === "SOS" ? (
                   <span
                     className={`font-black text-[9px] tracking-tight border px-1 py-0.5 rounded leading-none ${
-                      active ? "border-white text-white" : "border-gray-500 text-gray-600"
+                      active
+                        ? "border-white text-white"
+                        : "border-gray-500 text-gray-600"
                     }`}
                   >
                     SOS
