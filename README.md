@@ -1,127 +1,74 @@
-# CoGo - Ride Sharing Application (Frontend)
+# CoGo – Ride Sharing Application (Frontend)
 
-CoGo is a ride-sharing application that connects drivers and passengers travelling in the same direction. The frontend provides an interactive user interface for authentication, ride management, vehicle management, KYC verification, real-time chat, and live location tracking.
+CoGo is a ride-sharing platform that connects drivers and passengers traveling in the same direction. The frontend provides an interactive interface for ride management, vehicle management, KYC verification, real-time chat, and live location tracking.
+
+Built with **React 19** and **Vite**, the application provides a responsive user experience with integrated maps and real-time communication.
 
 ## Features
 
-### Authentication and User Management
+- **Authentication:** User registration, login, Google OAuth, OTP verification, and password reset.
+- **User Management:** Profile management and role-based protected routes.
+- **Ride Management:** Post, edit, search, and view rides with intermediate route matching.
+- **Ride Requests:** Send, accept, reject, and cancel ride requests.
+- **Vehicle Management:** Add, edit, view, and delete vehicles with image uploads.
+- **KYC Verification:** Document uploads, verification status, and admin review.
+- **Real-Time Chat:** WebSocket-based messaging and conversation history.
+- **Live Location:** Real-time driver location tracking using WebSockets and interactive maps.
+- **Admin Panel:** Dashboard, user management, and KYC verification management.
 
-- User registration and login
-- Google authentication
-- OTP verification
-- Forgot password and password reset
-- Protected routes based on user roles
-- User profile management
+## Tech Stack
 
-### Ride Management
-
-- Post and edit rides
-- Search for available rides
-- Intermediate route matching
-- View ride details
-- Manage ride requests
-- View bookings and booking details
-- Ride request status tracking
-
-### Vehicle Management
-
-- Add and edit vehicles
-- View registered vehicles
-- Upload and preview vehicle images
-- Delete vehicles
-
-### KYC Verification
-
-- Upload KYC documents
-- View submitted documents and verification status
-- Preview documents and images
-- Admin-side KYC review and rejection handling
-
-### Real-Time Features
-
-- Chat between ride participants
-- Live location tracking
-- Interactive maps and location search
-- Real-time location updates using WebSockets
-
-### Admin Panel
-
-- Admin login
-- Admin dashboard
-- User management
-- KYC verification management
-
-## Technology Stack
-
-### Frontend
-
-- **React 19** - Building reusable UI components and interactive interfaces.
-- **Vite** - Frontend development server and build tool.
-- **JavaScript (ES Modules)** - Application logic and component development.
-- **Tailwind CSS 4** - Utility-first styling.
-- **React Router DOM** - Client-side routing and navigation.
-- **Axios** - Communicating with backend APIs.
-- **Lucide React** - Icons for the user interface.
-
-### Maps and Location
-
-- **Mapbox Search JS React** - Location search and address selection.
-- **WebSockets** - Real-time communication with the backend for live location updates.
-
-### Authentication
-
-- **Google OAuth** - Google sign-in integration.
-- **React Router DOM** - Protected and role-based navigation.
-
-### UI Libraries
-
-- **React DatePicker** - Date selection.
-- **React Select** - Customizable selection controls.
-- **React Easy Crop** - Image cropping.
-- **React Toastify** - Toast notifications.
-
-### Development Tools
-
-- **ESLint** - Code quality and linting.
-- **Vite** - Development server and production builds.
+| Category | Technologies |
+|---|---|
+| Frontend | React 19, JavaScript |
+| Build Tool | Vite |
+| Styling | Tailwind CSS 4 |
+| Routing | React Router DOM |
+| API Communication | Axios |
+| Maps & Location | Mapbox Search JS React |
+| Real-Time Communication | WebSockets |
+| Authentication | Google OAuth |
+| UI Components | React Select, React DatePicker |
+| Image Processing | React Easy Crop |
+| Notifications | React Toastify |
+| Icons | Lucide React |
+| Code Quality | ESLint |
 
 ## Project Structure
 
 ```text
-frontend/
+COGO-Frontend/
 ├── public/
-│   ├── favicon.svg
-│   └── icons.svg
 ├── src/
-│   ├── api.js                      # API client configuration
-│   ├── assets/                     # Images and static assets
+│   ├── assets/
 │   ├── components/
-│   │   ├── admin/                  # Admin UI components
-│   │   ├── auth/                   # Authentication forms
-│   │   ├── chat/                   # Chat components
-│   │   ├── common/                 # Shared UI components
-│   │   ├── kyc/                    # KYC components
-│   │   ├── map/                    # Maps and live tracking
-│   │   ├── modals/                 # Reusable modals
-│   │   ├── profile/                # Profile components
-│   │   ├── ride/                   # Ride-related components
-│   │   └── vehicle/                # Vehicle components
-│   ├── context/                    # Shared application state
-│   ├── hooks/                      # Custom React hooks
-│   ├── layouts/                    # User, profile and admin layouts
+│   │   ├── admin/
+│   │   ├── auth/
+│   │   ├── chat/
+│   │   ├── common/
+│   │   ├── kyc/
+│   │   ├── map/
+│   │   ├── modals/
+│   │   ├── profile/
+│   │   ├── ride/
+│   │   └── vehicle/
+│   ├── context/
+│   ├── hooks/
+│   ├── layouts/
 │   ├── pages/
-│   │   ├── admin/                  # Admin pages
-│   │   ├── auth/                   # Authentication pages
-│   │   ├── kyc/                    # KYC pages
-│   │   ├── profile/                # Profile pages
-│   │   ├── ride/                   # Ride and booking pages
-│   │   └── vehicle/                # Vehicle pages
-│   ├── routes/                     # Route configuration
-│   ├── services/                   # API service modules
-│   ├── App.jsx                     # Root application component
-│   ├── App.css                     # Application styles
-│   ├── index.css                   # Global styles
-│   └── main.jsx                    # Application entry point
+│   │   ├── admin/
+│   │   ├── auth/
+│   │   ├── kyc/
+│   │   ├── profile/
+│   │   ├── ride/
+│   │   └── vehicle/
+│   ├── routes/
+│   ├── services/
+│   ├── api.js
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.jsx
 ├── .gitignore
 ├── eslint.config.js
 ├── index.html
@@ -131,119 +78,70 @@ frontend/
 └── README.md
 ```
 
-## Installation and Setup
-
-Follow these steps to set up and run the CoGo frontend locally.
+## Installation & Setup
 
 ### Prerequisites
-
-Make sure the following tools are installed:
 
 - Node.js
 - npm
 - Git
-- CoGo backend running locally or accessible through a configured API URL
+- CoGo backend
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
-cd <your-project-folder>/frontend
-```
+git clone <your-frontend-repository-url>
 
-Replace the placeholders with your actual GitHub repository URL and project folder name.
-
-If you already have the project on your computer, navigate directly to its frontend directory:
-
-```bash
-cd frontend
+cd COGO-Frontend
 ```
 
 ### 2. Install Dependencies
-
-Install the required Node.js packages:
 
 ```bash
 npm install
 ```
 
-This command installs the dependencies listed in `package.json`.
-
 ### 3. Configure Environment Variables
 
-Create a `.env` file in the frontend root directory, alongside `package.json`.
-
-Configure the following environment variables:
-
-| Variable | Description |
-|---|---|
-| `VITE_API_URL` | Base URL of the FastAPI backend. |
-| `VITE_GOOGLE_CLIENT_ID` | Client ID used for Google authentication. |
-| `VITE_MAPBOX_API_KEY` | API key used for Mapbox-related functionality, if referenced by your application. |
-| `VITE_MAPBOX_TOKEN` | Access token used for Mapbox maps and location services, if referenced by your application. |
-| `VITE_NINJA_API_KEY` | API key used to access API Ninjas services, depending on your implementation. |
-
-Example `.env` configuration:
+Create a `.env` file in the project root.
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000
-VITE_GOOGLE_CLIENT_ID=your-google-client-id
-VITE_MAPBOX_API_KEY=your-mapbox-api-key
-VITE_MAPBOX_TOKEN=your-mapbox-access-token
-VITE_NINJA_API_KEY=your-api-ninjas-api-key
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_MAPBOX_API_KEY=your_mapbox_api_key
+VITE_MAPBOX_TOKEN=your_mapbox_access_token
+VITE_NINJA_API_KEY=your_api_ninjas_api_key
 ```
 
-Replace the example values with your actual configuration.
-
-**Important security notes:**
-- Never commit your `.env` file or actual credentials to GitHub.
-- Add `.env` to your `.gitignore` file.
-- Vite exposes variables prefixed with `VITE_` to client-side code. Do not store private secrets in these variables. If an API key must remain secret, make requests through your backend instead.
-- Restart the Vite development server after changing environment variables.
-- Verify the exact variable names used in your frontend code. For example, `VITE_MAPBOX_API_KEY` and `VITE_MAPBOX_TOKEN` may serve different purposes, or one may be unused.
-
+Configure only the variables required by your application. Never expose private credentials through `VITE_` environment variables.
 
 ### 4. Run the Development Server
-
-Start the frontend:
 
 ```bash
 npm run dev
 ```
 
-Vite will display a local URL in the terminal, usually:
+The application will be available at:
 
 ```text
 http://localhost:5173
 ```
 
-Open that URL in your browser to access the application.
+### 5. Production Build
 
-Ensure the FastAPI backend is running and the frontend API configuration points to the correct backend URL.
-
-### 5. Build for Production
-
-Create an optimized production build:
+Build the application:
 
 ```bash
 npm run build
 ```
 
-The generated production files will be placed in the `dist/` directory.
-
-### 6. Preview the Production Build
-
-To preview the generated build locally:
+Preview the production build:
 
 ```bash
 npm run preview
 ```
 
-Use the local URL displayed in your terminal to view the production build.
-
-### 7. Run Code Quality Checks
-
-Run ESLint to check the frontend code:
+### 6. Run Code Quality Checks
 
 ```bash
 npm run lint
@@ -251,13 +149,21 @@ npm run lint
 
 ## Backend Integration
 
-The CoGo frontend communicates with the FastAPI backend for authentication, ride management, vehicle operations, KYC verification, chat, and live location features.
+CoGo frontend communicates with the FastAPI backend for authentication, ride operations, vehicle management, KYC verification, chat, and live location tracking.
 
-Make sure the backend is configured and running before testing features that require API access.
+**Backend Repository:** [CoGo Backend](https://github.com/sabarin992/COGO-Backend)
+
+Ensure the backend is running and `VITE_API_URL` points to the correct API endpoint.
 
 ## Future Improvements
 
-- **Payment Integration:** Integrate Stripe into the frontend to support secure online ride payments.
-- **SOS Management:** Add an emergency SOS interface for passengers and drivers, allowing users to request assistance during a ride.
-- **Admin Dashboard Enhancements:** Expand the admin dashboard with additional management and monitoring features.
-- **Sales Reports:** Add an admin-side sales reporting interface to display revenue, payment transactions, completed rides, and sales performance.
+- Stripe payment integration.
+- Emergency SOS interface.
+- Enhanced admin dashboard.
+- Sales and transaction reports.
+
+## Security
+
+- Keep `.env` files out of version control.
+- Use `.env.example` for documenting required environment variables.
+- Never expose private API credentials in frontend code.
