@@ -6,6 +6,7 @@ import AdminLogin from "../pages/admin/AdminLogin";
 import AdminLayout from "../layouts/AdminLayout";
 import AdminKYCVerification from "../pages/admin/AdminKYCVerification";
 import AdminRideManagement from "../pages/admin/AdminRideManagement";
+import AdminBookingManagement from "../pages/admin/AdminBookingManagement";
 
 const AdminRoutes = [
   {
@@ -35,6 +36,10 @@ const AdminRoutes = [
       {
         path: "rides",
         element: <AdminRideManagement />,
+      },
+      {
+        path: "bookings",
+        element: <AdminBookingManagement />,
       },
     ],
   },
