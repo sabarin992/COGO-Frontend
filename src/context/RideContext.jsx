@@ -17,6 +17,15 @@ export const RideProvider = ({ children }) => {
 
     vehicle_id: null,
     vehicle: null,
+
+    // Recurrence configuration
+    recurrence_type: "ONCE", // "ONCE" | "DAILY" | "WEEKDAYS" | "SHIFT" | "CUSTOM"
+    start_date: null,
+    end_date: null,
+    selected_weekdays: [], // [0, 1, 2...] for Mon, Tue, Wed...
+    working_days: 2,
+    off_days: 2,
+    shift_start_date: null,
   });
 
   useEffect(() => {
@@ -40,7 +49,15 @@ export const RideProvider = ({ children }) => {
       travel_date: null,
       travel_time: null,
       vehicle_id: null,
-      vehicle: null
+      vehicle: null,
+
+      recurrence_type: "ONCE",
+      start_date: null,
+      end_date: null,
+      selected_weekdays: [],
+      working_days: 2,
+      off_days: 2,
+      shift_start_date: null,
     });
   };
 

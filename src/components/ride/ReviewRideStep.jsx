@@ -1,19 +1,44 @@
 import { useMemo } from "react";
 import { useRide } from "../../context/RideContext";
-import { MapPin, Navigation, Calendar, Clock, Users, Car, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  MapPin,
+  Navigation,
+  Calendar,
+  Clock,
+  Users,
+  Car,
+  CheckCircle2,
+  Repeat,
+  Sparkles,
+} from "lucide-react";
+import {
+  calculateProjectedDates,
+  formatRecurrenceLabel,
+} from "../../utils/recurrenceUtils";
 
 const ReviewRideStep = () => {
   const { rideData } = useRide();
 
   const formattedDate = useMemo(() => {
-    if (!rideData.travel_date) return "-";
-    return rideData.travel_date.toLocaleDateString("en-IN", {
+    if (!rideData.travel_date && !rideData.start_date) return "-";
+    const d = rideData.travel_date || rideData.start_date;
+    return d.toLocaleDateString("en-IN", {
       weekday: "short",
       day: "numeric",
       month: "long",
       year: "numeric",
     });
-  }, [rideData.travel_date]);
+  }, [rideData.travel_date, rideData.start_date]);
+
+  const formattedEndDate = useMemo(() => {
+    if (!rideData.end_date) return "-";
+    return rideData.end_date.toLocaleDateString("en-IN", {
+      weekday: "short",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }, [rideData.end_date]);
 
   const formattedTime = useMemo(() => {
     if (!rideData.travel_time) return "-";
@@ -23,13 +48,36 @@ const ReviewRideStep = () => {
     });
   }, [rideData.travel_time]);
 
+  const projectedDates = useMemo(() => {
+    return calculateProjectedDates({
+      recurrence_type: rideData.recurrence_type,
+      start_date: rideData.start_date || rideData.travel_date,
+      end_date: rideData.end_date || rideData.travel_date,
+      selected_weekdays: rideData.selected_weekdays,
+      working_days: rideData.working_days,
+      off_days: rideData.off_days,
+      shift_start_date: rideData.shift_start_date,
+    });
+  }, [
+    rideData.recurrence_type,
+    rideData.start_date,
+    rideData.travel_date,
+    rideData.end_date,
+    rideData.selected_weekdays,
+    rideData.working_days,
+    rideData.off_days,
+    rideData.shift_start_date,
+  ]);
+
+  const isRecurring = rideData.recurrence_type && rideData.recurrence_type !== "ONCE";
+
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
       {/* Header */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Review Your Ride</h2>
         <p className="text-gray-500 text-sm md:text-base">
-          Please verify all details before publishing your ride to passengers.
+          Please verify all details before publishing your ride{isRecurring ? "s" : ""} to passengers.
         </p>
       </div>
 
@@ -71,22 +119,52 @@ const ReviewRideStep = () => {
         )}
       </div>
 
+      {/* Recurrence Banner if recurring */}
+      {isRecurring && (
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+              <Repeat size={20} />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-emerald-800">Recurring Schedule</p>
+              <p className="font-bold text-emerald-950 text-sm">
+                {formatRecurrenceLabel(
+                  rideData.recurrence_type,
+                  rideData.selected_weekdays,
+                  rideData.working_days,
+                  rideData.off_days
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-xs font-medium text-emerald-700">Rides Generated</span>
+            <p className="text-lg font-extrabold text-emerald-900">{projectedDates.length} Rides</p>
+          </div>
+        </div>
+      )}
+
       {/* Details Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Travel Date */}
+        {/* Travel Date / Date Range */}
         <div className="p-4 bg-gray-50 rounded-xl border border-gray-200/80 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
             <Calendar size={20} />
           </div>
           <div>
-            <span className="text-xs text-gray-500 font-medium">Travel Date</span>
-            <p className="font-semibold text-gray-900 text-sm">{formattedDate}</p>
+            <span className="text-xs text-gray-500 font-medium">
+              {isRecurring ? "Recurrence Window" : "Travel Date"}
+            </span>
+            <p className="font-semibold text-gray-900 text-sm">
+              {isRecurring ? `${formattedDate} to ${formattedEndDate}` : formattedDate}
+            </p>
           </div>
         </div>
 
         {/* Departure Time */}
         <div className="p-4 bg-gray-50 rounded-xl border border-gray-200/80 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
             <Clock size={20} />
           </div>
           <div>
@@ -97,18 +175,20 @@ const ReviewRideStep = () => {
 
         {/* Available Seats */}
         <div className="p-4 bg-gray-50 rounded-xl border border-gray-200/80 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
             <Users size={20} />
           </div>
           <div>
             <span className="text-xs text-gray-500 font-medium">Available Seats</span>
-            <p className="font-semibold text-gray-900 text-sm">{rideData.available_seats} {rideData.available_seats === 1 ? "seat" : "seats"}</p>
+            <p className="font-semibold text-gray-900 text-sm">
+              {rideData.available_seats} {rideData.available_seats === 1 ? "seat" : "seats"} (per ride)
+            </p>
           </div>
         </div>
 
         {/* Vehicle */}
         <div className="p-4 bg-gray-50 rounded-xl border border-gray-200/80 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
             <Car size={20} />
           </div>
           <div>
@@ -125,7 +205,9 @@ const ReviewRideStep = () => {
       {/* Verification Notice */}
       <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 text-blue-800 text-xs font-medium flex items-center gap-3">
         <CheckCircle2 size={18} className="text-blue-600 shrink-0" />
-        <span>All information verified. Click <strong>Publish Ride</strong> below to offer your ride to passengers!</span>
+        <span>
+          All details verified. Click <strong>{isRecurring ? `Publish ${projectedDates.length} Rides` : "Publish Ride"}</strong> below to offer your ride to passengers!
+        </span>
       </div>
     </div>
   );

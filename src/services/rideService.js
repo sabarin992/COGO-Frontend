@@ -166,3 +166,50 @@ export const getConversationByRequest = async (rideRequestId) => {
   );
   return response.data; // { conversation_id: <number> }
 };
+
+// ==========================================
+// RECURRING RIDES API SERVICES
+// ==========================================
+
+// Create a new recurring ride schedule and generate rides
+export const createRecurringRide = async (recurringRideData) => {
+  const response = await api.post("/recurring-rides", recurringRideData);
+  return response.data;
+};
+
+// Get all recurring ride schedules posted by the logged-in driver
+export const getRecurringRides = async () => {
+  const response = await api.get("/recurring-rides");
+  return response.data;
+};
+
+// Get details of a single recurring ride schedule and its generated rides
+export const getRecurringRideById = async (recurringRideId) => {
+  const response = await api.get(`/recurring-rides/${recurringRideId}`);
+  return response.data;
+};
+
+// Update an existing recurring ride schedule (updates future unbooked rides)
+export const updateRecurringRide = async (recurringRideId, updateData) => {
+  const response = await api.put(`/recurring-rides/${recurringRideId}`, updateData);
+  return response.data;
+};
+
+// Pause a recurring ride schedule
+export const pauseRecurringRide = async (recurringRideId) => {
+  const response = await api.patch(`/recurring-rides/${recurringRideId}/pause`);
+  return response.data;
+};
+
+// Resume a paused recurring ride schedule
+export const resumeRecurringRide = async (recurringRideId) => {
+  const response = await api.patch(`/recurring-rides/${recurringRideId}/resume`);
+  return response.data;
+};
+
+// Cancel/Delete a recurring ride schedule (preserves booked rides)
+export const deleteRecurringRide = async (recurringRideId) => {
+  const response = await api.delete(`/recurring-rides/${recurringRideId}`);
+  return response.data;
+};
+
