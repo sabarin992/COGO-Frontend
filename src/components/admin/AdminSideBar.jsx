@@ -4,6 +4,7 @@ import {
   LayoutDashboard, 
   Users, 
   ShieldCheck, 
+  Car,
   Bike, 
   Calendar, 
   AlertTriangle, 
@@ -34,6 +35,11 @@ const AdminSideBar = () => {
       path: "/admin/kyc",
     },
     {
+      icon: "car",
+      label: "Rides",
+      path: "/admin/rides",
+    },
+    {
       icon: "moped",
       label: "Riders",
       path: "/admin/riders",
@@ -60,6 +66,7 @@ const AdminSideBar = () => {
     dashboard: LayoutDashboard,
     group: Users,
     verified_user: ShieldCheck,
+    car: Car,
     moped: Bike,
     event_note: Calendar,
     warning: AlertTriangle,
