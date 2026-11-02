@@ -122,18 +122,25 @@ export default function useLocationWebSocket({ rideId, role, enabled = true }) {
     };
 
     ws.onerror = () => {
-      // onerror fires before onclose; the close event carries the code.
-      setWsError("WebSocket connection error. Check your network or authentication.");
+      // onerror fires before onclose; onclose provides the specific code and reason.
     };
 
     ws.onclose = (event) => {
       setStatus("closed");
-      // Code 1008 = server rejected the connection (auth or ride-status check failed).
-      if (event.code === 1008) {
+      if (event.code === 1000) {
+        // Normal closure (ride completed, component unmounted, etc.)
+        setWsError(null);
+      } else if (event.code === 1008) {
+        // Code 1008 = server rejected the connection (auth, booking status, or ride status check failed).
         setWsError(
           event.reason ||
-            "Connection rejected by server. The ride may have ended or you are not authorized."
+            "Connection rejected by server. You may not be authorized, or the ride is not active."
         );
+      } else if (event.code === 1006) {
+        // Abnormal closure (e.g. handshake failure, network dropped)
+        setWsError("Unable to connect to live location service. Please check your connection.");
+      } else {
+        setWsError(event.reason || "Live location connection closed.");
       }
     };
 

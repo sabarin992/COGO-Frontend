@@ -54,32 +54,51 @@ const MyBookingDetails = () => {
     enabled: isPassengerTrackingActive,
   });
 
-  const fetchDetails = async () => {
+  const fetchDetails = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError("");
       const data = await getSingleRideRequestDetails(requestId);
       setBooking(data);
     } catch (err) {
-      console.error("Failed to fetch booking details:", err);
-      const detail = err?.response?.data?.detail;
-      const errorMsg =
-        typeof detail === "string"
-          ? detail
-          : (Array.isArray(detail) && detail[0]?.msg) ||
-            err?.response?.data?.message ||
-            "Unable to load booking details.";
-      setError(errorMsg);
+      if (showLoading) {
+        console.error("Failed to fetch booking details:", err);
+        const detail = err?.response?.data?.detail;
+        const errorMsg =
+          typeof detail === "string"
+            ? detail
+            : (Array.isArray(detail) && detail[0]?.msg) ||
+              err?.response?.data?.message ||
+              "Unable to load booking details.";
+        setError(errorMsg);
+      }
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
     if (requestId) {
-      fetchDetails();
+      fetchDetails(true);
     }
   }, [requestId]);
+
+  // Periodic background refresh when booking is accepted/picked_up and ride is pending or active
+  useEffect(() => {
+    if (!booking) return;
+    const isOngoingOrUpcoming =
+      (booking.status === "accepted" || booking.status === "picked_up") &&
+      booking.ride_status !== "COMPLETED" &&
+      booking.ride_status !== "CANCELLED";
+
+    if (!isOngoingOrUpcoming) return;
+
+    const interval = setInterval(() => {
+      fetchDetails(false);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [booking?.status, booking?.ride_status, requestId]);
 
   // Fetch the conversation ID once booking details are loaded
   // (only relevant when the booking is accepted)
@@ -325,7 +344,7 @@ const MyBookingDetails = () => {
         <div>
           <LiveTrackingMap
             driverLocation={driverLocation}
-            label="Driver\'s Live Location"
+            label="Driver's Live Location"
           />
           {locationWsError && (
             <p className="mt-2 text-center text-xs text-amber-700">
